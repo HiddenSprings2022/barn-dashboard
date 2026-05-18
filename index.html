@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Stables at Hidden Springs</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f3ee; color: #2d2a25; min-height: 100vh; }
+
+  /* ── Setup overlay ── */
+  #setupOverlay { position: fixed; inset: 0; background: #2d2a25; z-index: 999; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .setup-box { background: #fff; border-radius: 20px; padding: 36px; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,.4); }
+  .setup-logo { font-size: 48px; margin-bottom: 12px; }
+  .setup-box h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .setup-box h2 { font-size: 15px; font-style: italic; color: #8b5e3c; font-family: Georgia, serif; font-weight: 400; margin-bottom: 20px; }
+  .setup-box p { font-size: 14px; color: #6b6358; margin-bottom: 20px; line-height: 1.6; }
+  .setup-input { width: 100%; border: 2px solid #d8d3cc; border-radius: 10px; padding: 12px 14px; font-size: 14px; font-family: monospace; margin-bottom: 12px; }
+  .setup-input:focus { outline: none; border-color: #8b5e3c; }
+  .setup-btn { width: 100%; background: #8b5e3c; color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .setup-btn:hover { background: #7a5234; }
+  .setup-hint { font-size: 12px; color: #a09888; margin-top: 14px; line-height: 1.5; }
+  .setup-hint a { color: #8b5e3c; }
+
+  /* ── Sync status ── */
+  .sync-bar { background: #3d3930; color: #f5f3ee; padding: 6px 24px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #a09888; display: inline-block; margin-right: 6px; }
+  .sync-dot.green { background: #4caf50; }
+  .sync-dot.yellow { background: #ff9800; animation: pulse .8s ease infinite; }
+  .sync-dot.red { background: #f44336; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .sync-btn { background: none; border: 1px solid #5a5248; color: #c9b99a; padding: 3px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+  .sync-btn:hover { background: #4d4840; }
+
+  /* ── Header ── */
+  .header { background: #2d2a25; color: #f5f3ee; padding: 14px 24px; display: flex; align-items: center; gap: 14px; }
+  .header-estd { font-size: 10px; letter-spacing: 2px; color: #a09888; font-variant: small-caps; }
+  .header-name { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; line-height: 1.2; }
+  .header-script { font-size: 18px; font-style: italic; color: #c9b99a; font-family: Georgia, serif; letter-spacing: .5px; line-height: 1; margin-top: 2px; }
+
+  .month-bar { background: #3d3930; color: #f5f3ee; padding: 8px 24px; display: flex; align-items: center; gap: 12px; font-size: 14px; }
+  .month-bar select { background: #4d4840; color: #f5f3ee; border: none; border-radius: 6px; padding: 4px 8px; font-size: 14px; cursor: pointer; }
+  .month-bar label { color: #a09888; }
+
+  .tabs { background: #fff; border-bottom: 1px solid #e8e3db; display: flex; padding: 0 24px; overflow-x: auto; }
+  .tab { padding: 12px 20px; font-size: 14px; font-weight: 500; cursor: pointer; color: #6b6358; border-bottom: 2px solid transparent; transition: all .15s; white-space: nowrap; }
+  .tab:hover { color: #2d2a25; }
+  .tab.active { color: #8b5e3c; border-bottom-color: #8b5e3c; }
+
+  .content { padding: 24px; max-width: 1100px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .card { background: #fff; border-radius: 12px; border: 1px solid #e8e3db; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 12px; font-weight: 700; color: #6b6358; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 14px; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: #fff; border-radius: 12px; border: 1px solid #e8e3db; padding: 16px; }
+  .stat-label { font-size: 12px; color: #6b6358; font-weight: 500; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: #2d2a25; }
+  .stat-sub { font-size: 12px; color: #a09888; margin-top: 4px; }
+  .stat-card.green .stat-value { color: #2d7a4f; }
+  .stat-card.red .stat-value { color: #c0392b; }
+  .stat-card.amber .stat-value { color: #b8860b; }
+
+  .alert-banner { border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+  .alert-banner.warning { background: #fef3cd; border: 1px solid #f0c040; color: #7d6008; }
+
+  .ctable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .ctable th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; color: #6b6358; text-transform: uppercase; letter-spacing: .6px; border-bottom: 2px solid #e8e3db; background: #faf8f5; white-space: nowrap; }
+  .ctable td { padding: 11px 14px; border-bottom: 1px solid #f0ece6; vertical-align: top; }
+  .ctable tr:last-child td { border-bottom: none; }
+  .ctable tr:hover td { background: #faf8f5; }
+  .ctable tr.row-overdue td { background: #fffbf0; }
+
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge.paid    { background: #d4edda; color: #1a5c30; }
+  .badge.unpaid  { background: #f0ece6; color: #5a5248; }
+  .badge.overdue { background: #fff3cd; color: #7d4e00; }
+  .badge.stall   { background: #ede9f5; color: #4a1a6b; font-size: 11px; }
+  .badge.pasture { background: #e6f4ec; color: #1a4a30; font-size: 11px; }
+
+  .horse-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .hchip { display: inline-flex; align-items: center; gap: 3px; background: #f0ece6; border-radius: 6px; padding: 3px 8px; font-size: 12px; color: #3a3530; white-space: nowrap; }
+  .hchip.pasture { background: #e6f4ec; color: #1a4a30; }
+
+  /* Inline rate editing */
+  .rate-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .rate-row:last-child { margin-bottom: 0; }
+  .rate-horse-name { font-size: 12px; color: #6b6358; width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rate-input { width: 80px; border: 1px solid #d8d3cc; border-radius: 6px; padding: 4px 8px; font-size: 13px; font-weight: 600; color: #2d2a25; background: #fff; transition: border-color .15s; }
+  .rate-input:focus { outline: none; border-color: #8b5e3c; box-shadow: 0 0 0 2px rgba(139,94,60,.1); }
+  .rate-input.pasture-rate { background: #f0faf4; }
+  .rate-saved-flash { animation: flashGreen .6s ease; }
+  @keyframes flashGreen { 0%,100%{border-color:#d8d3cc} 40%{border-color:#2d7a4f; background:#f0faf4;} }
+
+  /* Venmo inline */
+  .venmo-display { font-size: 13px; color: #008CFF; font-weight: 600; cursor: pointer; }
+  .venmo-display:hover { text-decoration: underline; }
+  .venmo-unset { font-size: 12px; color: #a09888; cursor: pointer; border: 1px dashed #d8d3cc; border-radius: 6px; padding: 3px 8px; transition: all .15s; display: inline-block; }
+  .venmo-unset:hover { border-color: #008CFF; color: #008CFF; background: #f0f8ff; }
+  .venmo-edit-wrap { display: none; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .venmo-edit-wrap.open { display: flex; }
+  .venmo-input { width: 120px; border: 1px solid #008CFF; border-radius: 6px; padding: 4px 8px; font-size: 13px; }
+  .venmo-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(0,140,255,.15); }
+
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; text-decoration: none; }
+  .btn-primary   { background: #8b5e3c; color: #fff; }
+  .btn-primary:hover { background: #7a5234; }
+  .btn-venmo     { background: #008CFF; color: #fff !important; font-size: 12px; padding: 4px 10px; }
+  .btn-venmo:hover { background: #006fd6; }
+  .btn-pay       { background: #e8f5e9; color: #1a5c30; font-size: 12px; padding: 5px 12px; font-weight: 600; }
+  .btn-pay.is-paid { background: #fdecea; color: #7b1a1a; }
+  .btn-pay:hover { opacity: .85; }
+  .btn-secondary { background: #f0ece6; color: #2d2a25; }
+  .btn-secondary:hover { background: #e8e3db; }
+  .btn-danger    { background: #fdecea; color: #7b1a1a; }
+  .btn-danger:hover { background: #f5d0cc; }
+  .btn-sm   { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
+  .btn-icon { background: none; color: #6b6358; padding: 4px 8px; font-size: 15px; }
+  .btn-icon:hover { background: #f0ece6; border-radius: 6px; }
+
+  .form-row   { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: #6b6358; }
+  .form-group input,
+  .form-group select,
+  .form-group textarea { border: 1px solid #d8d3cc; border-radius: 8px; padding: 8px 10px; font-size: 14px; color: #2d2a25; background: #fff; font-family: inherit; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus
+    { outline: none; border-color: #8b5e3c; box-shadow: 0 0 0 3px rgba(139,94,60,.12); }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 16px; padding: 24px; width: 560px; max-width: 96vw; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.22); }
+  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+  .modal-footer { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+  .divider { border: none; border-top: 1px solid #e8e3db; margin: 14px 0; }
+
+  .horse-row { display: flex; gap: 8px; align-items: flex-end; padding: 10px; background: #faf8f5; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e8e3db; flex-wrap: wrap; }
+  .horse-row .form-group { min-width: 90px; }
+
+  .expense-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; border: 1px solid #e8e3db; margin-bottom: 8px; background: #fff; }
+  .exp-icon  { width: 38px; height: 38px; border-radius: 10px; background: #f0ece6; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .exp-info  { flex: 1; min-width: 0; }
+  .exp-vendor { font-size: 14px; font-weight: 600; }
+  .exp-meta   { font-size: 12px; color: #6b6358; margin-top: 2px; }
+  .exp-amount { font-size: 16px; font-weight: 700; color: #c0392b; white-space: nowrap; }
+
+  .upload-zone { border: 2px dashed #d8d3cc; border-radius: 12px; padding: 28px; text-align: center; cursor: pointer; transition: all .15s; background: #faf8f5; }
+  .upload-zone:hover, .upload-zone.dragover { border-color: #8b5e3c; background: #f5f0ea; }
+  .upload-zone input { display: none; }
+  .receipt-preview { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 12px; display: none; }
+
+  .gtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .gtable th { text-align: left; padding: 9px 12px; font-size: 11px; font-weight: 700; color: #6b6358; text-transform: uppercase; letter-spacing: .5px; border-bottom: 2px solid #e8e3db; background: #faf8f5; white-space: nowrap; }
+  .gtable td { padding: 9px 12px; border-bottom: 1px solid #f0ece6; vertical-align: middle; }
+  .gtable tr:last-child td { border-bottom: none; }
+  .gtable input[type=number] { border: 1px solid #d8d3cc; border-radius: 6px; padding: 4px 8px; font-size: 13px; width: 70px; }
+
+  .inner-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .inner-tab  { padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; color: #6b6358; background: #f0ece6; border: none; transition: all .15s; }
+  .inner-tab.active { background: #8b5e3c; color: #fff; }
+
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+  .section-header h2 { font-size: 18px; font-weight: 700; }
+
+  .empty { text-align: center; padding: 34px 20px; color: #a09888; }
+  .empty .ei { font-size: 34px; margin-bottom: 10px; }
+  .empty p { font-size: 14px; }
+
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #e8e3db; border-top-color: #8b5e3c; border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .mt-8 { margin-top: 8px; }
+
+  @media (max-width: 700px) {
+    .content { padding: 12px; }
+    .stat-grid { grid-template-columns: repeat(2,1fr); }
+    .ctable { display: block; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ FIRST-RUN SETUP ═══ -->
+<div id="setupOverlay" style="display:none;">
+  <div class="setup-box">
+    <div class="setup-logo">🐴</div>
+    <h1>The Stables at Hidden Springs</h1>
+    <h2>Barn Dashboard</h2>
+    <p>To sync data between you and your wife, paste your <strong>Firebase Database URL</strong> below.<br>It looks like:<br><code style="font-size:12px;color:#8b5e3c;">https://your-project.firebaseio.com</code></p>
+    <input class="setup-input" id="setupUrl" type="url" placeholder="https://your-project-default-rtdb.firebaseio.com">
+    <button class="setup-btn" onclick="connectFirebase()">Connect &amp; Open Dashboard →</button>
+    <div class="setup-hint">
+      Don't have one yet? <a href="https://console.firebase.google.com" target="_blank">Create a free Firebase project →</a><br>
+      (Realtime Database → Create Database → Test Mode → copy the URL)
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <svg width="52" height="52" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+    <rect width="100" height="100" rx="10" fill="#3a3530"/>
+    <path d="M30 28 L36 38 L50 30 L64 38 L70 28 L70 42 L30 42 Z" fill="#c9b99a"/>
+    <circle cx="30" cy="26" r="3" fill="#c9b99a"/>
+    <circle cx="50" cy="24" r="3" fill="#c9b99a"/>
+    <circle cx="70" cy="26" r="3" fill="#c9b99a"/>
+    <path d="M22 46 L78 46 L78 72 L50 84 L22 72 Z" fill="none" stroke="#c9b99a" stroke-width="2.5"/>
+    <path d="M44 76 L44 64 C44 62 46 60 48 60 L52 60 C54 60 56 62 56 64 L56 70" fill="#c9b99a"/>
+    <ellipse cx="55" cy="60" rx="9" ry="7" fill="#c9b99a"/>
+    <ellipse cx="62" cy="64" rx="5" ry="4" fill="#c9b99a"/>
+    <path d="M50 54 L47 47 L54 52" fill="#c9b99a"/>
+    <circle cx="54" cy="59" r="1.4" fill="#3a3530"/>
+    <text x="50" y="96" font-family="Georgia,serif" font-size="7" fill="#a09888" text-anchor="middle" letter-spacing="1">ESTD · 2024</text>
+  </svg>
+  <div>
+    <div class="header-estd">Est. 2024</div>
+    <div class="header-name">The Stables At</div>
+    <div class="header-script">Hidden Springs</div>
+  </div>
+</div>
+
+<!-- ═══ SYNC BAR ═══ -->
+<div class="sync-bar">
+  <div style="display:flex;align-items:center;">
+    <span class="sync-dot" id="syncDot"></span>
+    <span id="syncLabel">Connecting…</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span id="syncTime" style="color:#6b6358;"></span>
+    <button class="sync-btn" onclick="syncNow()">↻ Sync Now</button>
+    <button class="sync-btn" onclick="changeDatabase()" title="Change database URL">⚙ DB</button>
+  </div>
+</div>
+
+<!-- ═══ MONTH BAR ═══ -->
+<div class="month-bar">
+  <label>Viewing:</label>
+  <select id="monthSelect" onchange="setMonth()"></select>
+</div>
+
+<!-- ═══ TABS ═══ -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('overview',this)">📊 Overview</div>
+  <div class="tab" onclick="showTab('clients',this)">🏠 Clients &amp; Payments</div>
+  <div class="tab" onclick="showTab('expenses',this)">💰 Expenses</div>
+  <div class="tab" onclick="showTab('grain',this)">🌾 Grain</div>
+</div>
+
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="tab-overview">
+    <div id="overviewBanner"></div>
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="card">
+      <div class="card-title">Payment Status — <span id="overviewMonthLabel"></span></div>
+      <div id="overviewList"></div>
+    </div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="section" id="tab-clients">
+    <div class="section-header">
+      <h2>Clients &amp; Payments</h2>
+      <button class="btn btn-primary" onclick="openAddClient()">＋ Add Client</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="ctable">
+        <thead><tr>
+          <th>Client</th><th>Horses</th><th>Board Rate ($/mo)</th>
+          <th>Venmo</th><th>Due</th><th>Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="clientBody"></tbody>
+      </table>
+      <div id="clientEmpty" class="empty" style="display:none;"><div class="ei">🏠</div><p>No clients yet.</p></div>
+    </div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div class="section" id="tab-expenses">
+    <div class="section-header">
+      <h2>Expenses</h2>
+      <button class="btn btn-primary" onclick="openAddExpense()">＋ Add Expense</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📷 Upload a Receipt</div>
+      <div class="upload-zone" id="uploadZone"
+           onclick="document.getElementById('receiptFile').click()"
+           ondragover="event.preventDefault();this.classList.add('dragover')"
+           ondrop="handleDrop(event)" ondragleave="this.classList.remove('dragover')">
+        <input type="file" id="receiptFile" accept="image/*" onchange="handleReceiptUpload(event)">
+        <div style="font-size:32px;margin-bottom:8px;">🧾</div>
+        <div style="font-size:14px;color:#6b6358;">Click to upload a receipt, or drag &amp; drop</div>
+        <div style="font-size:12px;color:#a09888;margin-top:4px;">Photo will display so you can fill in the details</div>
+        <img class="receipt-preview" id="receiptPreview">
+      </div>
+    </div>
+    <div class="stat-grid" id="expenseSummary"></div>
+    <div id="expenseList"></div>
+  </div>
+
+  <!-- GRAIN -->
+  <div class="section" id="tab-grain">
+    <div class="section-header"><h2>Grain Tracking</h2></div>
+    <div class="inner-tabs">
+      <button class="inner-tab active" onclick="showGrainTab('schedule',this)">Feed Schedule</button>
+      <button class="inner-tab" onclick="showGrainTab('types',this)">Grain Types</button>
+      <button class="inner-tab" onclick="showGrainTab('billing',this)">Monthly Billing</button>
+    </div>
+    <div id="grain-schedule">
+      <div class="card">
+        <div class="card-title">Daily Feed — Pounds Per Day</div>
+        <div style="overflow-x:auto;"><table class="gtable"><thead><tr id="grainHead"></tr></thead><tbody id="grainBody"></tbody></table></div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="saveGrainSchedule()">💾 Save Schedule</button>
+          <button class="btn btn-secondary btn-sm" onclick="openAddGrainType()">＋ Add Grain Type</button>
+        </div>
+      </div>
+    </div>
+    <div id="grain-types" style="display:none;">
+      <div class="card">
+        <div class="card-title">Grain Types &amp; Pricing</div>
+        <div id="grainTypeList"></div>
+        <button class="btn btn-primary btn-sm mt-8" onclick="openAddGrainType()">＋ Add Grain Type</button>
+      </div>
+    </div>
+    <div id="grain-billing" style="display:none;">
+      <div class="card">
+        <div class="card-title">Grain Charges — <span id="grainBillingLabel"></span></div>
+        <div style="overflow-x:auto;"><table class="gtable">
+          <thead><tr><th>Client</th><th>Horse</th><th>Grain</th><th>Lbs/Day</th><th>Days</th><th>Total Lbs</th><th>Cost/Lb</th><th>Charge/Lb</th><th>Bill Amount</th></tr></thead>
+          <tbody id="grainBillingBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Client -->
+<div class="modal-overlay" id="modalClient">
+  <div class="modal">
+    <h2 id="clientModalTitle">Add Client</h2>
+    <input type="hidden" id="cf_id">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;"><label>Client Name *</label><input id="cf_name" type="text" placeholder="Jane Smith"></div>
+      <div class="form-group"><label>Venmo (no @)</label><input id="cf_venmo" type="text" placeholder="janevenmo"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Payment Due</label><select id="cf_dueDay"><option value="1">1st of month</option><option value="15">15th of month</option></select></div>
+      <div class="form-group"><label>Phone / Email</label><input id="cf_contact" type="text" placeholder="optional"></div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:700;color:#6b6358;text-transform:uppercase;letter-spacing:.5px;">Horses</div>
+      <button class="btn btn-secondary btn-sm" onclick="addHorseRow()">＋ Add Horse</button>
+    </div>
+    <div id="horseRows"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="btnDeleteClient" onclick="deleteClient()" style="margin-right:auto;display:none;">Delete Client</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalClient')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveClient()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense -->
+<div class="modal-overlay" id="modalExpense">
+  <div class="modal">
+    <h2>Add Expense</h2>
+    <img id="expenseReceiptThumb" style="max-width:100%;max-height:140px;border-radius:8px;margin-bottom:12px;display:none;">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;"><label>Vendor / Description *</label><input id="ex_vendor" type="text" placeholder="Tractor Supply Co."></div>
+      <div class="form-group"><label>Amount ($) *</label><input id="ex_amount" type="number" step="0.01" placeholder="0.00" min="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date *</label><input id="ex_date" type="date"></div>
+      <div class="form-group"><label>Category</label>
+        <select id="ex_cat">
+          <option value="feed">🌾 Feed / Grain</option><option value="bedding">🛏 Bedding</option>
+          <option value="vet">🩺 Veterinary</option><option value="farrier">🔨 Farrier</option>
+          <option value="supplies">🧰 Supplies</option><option value="equipment">⚙️ Equipment</option>
+          <option value="utilities">💡 Utilities</option><option value="other">📦 Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row"><div class="form-group"><label>Notes</label><textarea id="ex_notes" rows="2" style="resize:vertical;"></textarea></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalExpense')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveExpense()">Add Expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- Grain Type -->
+<div class="modal-overlay" id="modalGrainType">
+  <div class="modal">
+    <h2 id="grainTypeModalTitle">Add Grain Type</h2>
+    <input type="hidden" id="gt_id">
+    <div class="form-row"><div class="form-group" style="flex:2;"><label>Grain Name *</label><input id="gt_name" type="text" placeholder="Purina Senior, Alfalfa Pellets…"></div></div>
+    <div class="form-row">
+      <div class="form-group"><label>Your Cost per Lb ($)</label><input id="gt_cost" type="number" step="0.001" placeholder="0.250" min="0"></div>
+      <div class="form-group"><label>Charge to Client per Lb ($)</label><input id="gt_charge" type="number" step="0.001" placeholder="0.300" min="0"></div>
+    </div>
+    <p style="font-size:12px;color:#a09888;margin-top:-4px;">Leave blank to track without billing.</p>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="btnDeleteGrain" onclick="deleteGrainTypeFromModal()" style="margin-right:auto;display:none;">Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalGrainType')">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveGrain" onclick="saveGrainType()">Add Grain Type</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+//  FIREBASE SYNC via REST API
+//  No SDK needed — just fetch()
+// ════════════════════════════════════════════
+const LS_URL_KEY  = 'barnFirebaseUrl';
+const LS_DATA_KEY = 'barnDataBackup';
+let FIREBASE_URL  = '';   // set after setup
+let syncInterval  = null;
+let lastSyncTime  = null;
+let isSyncing     = false;
+
+const SEED_CLIENTS = [
+  { name:'Naomi',        horses:[{name:'Bow',location:'stall',rate:600},{name:'Shadow',location:'pasture',rate:0},{name:'Patty',location:'stall',rate:600}]},
+  { name:'Jessica Johns',horses:[{name:'Prada',location:'stall',rate:600},{name:'Flirt',location:'stall',rate:600}]},
+  { name:'Marlene',      horses:[{name:'Gunny',location:'pasture',rate:0}]},
+  { name:'Ashley',       horses:[{name:'Cat',location:'pasture',rate:0}]},
+  { name:'Deb',          horses:[{name:'Beauty',location:'stall',rate:600},{name:'Ellie',location:'stall',rate:600}]},
+  { name:'Anne',         horses:[{name:'Kai',location:'stall',rate:600}]},
+  { name:'Emily',        horses:[{name:'Jet',location:'stall',rate:600}]},
+  { name:'Tanya',        horses:[{name:'Dream',location:'pasture',rate:0}]},
+  { name:'Laura',        horses:[{name:'Lele',location:'stall',rate:600}]},
+  { name:'Jessica Rosen',horses:[{name:'Mandrid',location:'stall',rate:600}]},
+  { name:'Erica',        horses:[{name:'Chichi',location:'pasture',rate:0}]},
+  { name:'Brooke',       horses:[{name:'Odin',location:'stall',rate:600}]},
+  { name:'Shelby',       horses:[{name:'Tre',location:'stall',rate:600}]},
+  { name:'Sue',          horses:[{name:'Ravi',location:'stall',rate:600}]},
+];
+
+let db = {clients:[],payments:{},expenses:[],grainTypes:[],grainSchedule:{}};
+
+function uid() { return '_'+Math.random().toString(36).slice(2,9)+Date.now().toString(36); }
+
+function buildSeed() {
+  db.clients = SEED_CLIENTS.map(c=>({
+    id:uid(), name:c.name, venmo:'', contact:'', dueDay:1,
+    horses:c.horses.map(h=>({id:uid(), name:h.name, location:h.location, stallNum:'', rate:h.rate}))
+  }));
+  db.grainTypes = [{id:uid(), name:'Alfalfa', costPerLb:0, chargePerLb:0}];
+}
+
+// ── Sync status display ──
+function setSyncStatus(state, msg) {
+  const dot   = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  dot.className = 'sync-dot ' + (state==='ok'?'green':state==='busy'?'yellow':'red');
+  label.textContent = msg;
+}
+function setSyncTime() {
+  lastSyncTime = new Date();
+  const t = lastSyncTime.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('syncTime').textContent = 'Last sync: '+t;
+}
+
+// ── Firebase REST ──
+async function cloudGet() {
+  const res = await fetch(FIREBASE_URL + '/barnData.json');
+  if (!res.ok) throw new Error('GET failed: '+res.status);
+  return await res.json();
+}
+async function cloudSet(data) {
+  const res = await fetch(FIREBASE_URL + '/barnData.json', {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('PUT failed: '+res.status);
+}
+
+async function syncNow(skipSave) {
+  if (!FIREBASE_URL) return;
+  if (isSyncing) return;
+  isSyncing = true;
+  setSyncStatus('busy', 'Syncing…');
+  try {
+    const remote = await cloudGet();
+    if (remote) {
+      // Use remote data
+      db = ensureArrays(remote);
+    }
+    // If remote is null, this is first run — push seed
+    if (!remote) {
+      if (!db.clients.length) buildSeed();
+      await cloudSet(db);
+    }
+    localStorage.setItem(LS_DATA_KEY, JSON.stringify(db));
+    setSyncStatus('ok', '🟢 Synced');
+    setSyncTime();
+    renderAll();
+  } catch(e) {
+    setSyncStatus('red', '⚠ Sync failed — working offline');
+  }
+  isSyncing = false;
+}
+
+async function saveDB() {
+  // optimistic local save
+  localStorage.setItem(LS_DATA_KEY, JSON.stringify(db));
+  if (!FIREBASE_URL) return;
+  setSyncStatus('busy', 'Saving…');
+  try {
+    await cloudSet(db);
+    setSyncStatus('ok', '🟢 Saved');
+    setSyncTime();
+  } catch(e) {
+    setSyncStatus('red', '⚠ Save failed — check connection');
+  }
+}
+
+function ensureArrays(data) {
+  return {
+    clients:      Array.isArray(data.clients)      ? data.clients      : [],
+    payments:     data.payments      || {},
+    expenses:     Array.isArray(data.expenses)     ? data.expenses     : [],
+    grainTypes:   Array.isArray(data.grainTypes)   ? data.grainTypes   : [],
+    grainSchedule:data.grainSchedule || {},
+  };
+}
+
+// ── Setup / connect ──
+function connectFirebase() {
+  let url = document.getElementById('setupUrl').value.trim().replace(/\/+$/, '');
+  if (!url) { alert('Please paste your Firebase database URL.'); return; }
+  if (!url.startsWith('http')) { alert('That doesn\'t look like a valid URL. It should start with https://'); return; }
+  localStorage.setItem(LS_URL_KEY, url);
+  FIREBASE_URL = url;
+  document.getElementById('setupOverlay').style.display = 'none';
+  startSync();
+}
+
+function changeDatabase() {
+  const newUrl = prompt('Paste your Firebase Database URL:', FIREBASE_URL);
+  if (newUrl && newUrl.trim()) {
+    FIREBASE_URL = newUrl.trim().replace(/\/+$/,'');
+    localStorage.setItem(LS_URL_KEY, FIREBASE_URL);
+    syncNow();
+  }
+}
+
+function startSync() {
+  syncNow();
+  // Poll every 30 seconds to pick up changes from wife's device
+  if (syncInterval) clearInterval(syncInterval);
+  syncInterval = setInterval(syncNow, 30000);
+}
+
+function init() {
+  const savedUrl = localStorage.getItem(LS_URL_KEY);
+  if (savedUrl) {
+    FIREBASE_URL = savedUrl;
+    // Try to use cached data immediately while we sync
+    const cached = localStorage.getItem(LS_DATA_KEY);
+    if (cached) {
+      try { db = ensureArrays(JSON.parse(cached)); } catch(e) {}
+      renderAll();
+    }
+    startSync();
+  } else {
+    // Show setup screen
+    document.getElementById('setupOverlay').style.display = 'flex';
+    setSyncStatus('red', 'Not connected');
+  }
+}
+
+// ════════════════════════════════
+//  MONTH
+// ════════════════════════════════
+let curY, curM;
+const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function initMonth() {
+  const now=new Date(); curY=now.getFullYear(); curM=now.getMonth()+1;
+  const sel=document.getElementById('monthSelect');
+  for(let i=-6;i<=3;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()+i,1);
+    const o=document.createElement('option');
+    o.value=`${d.getFullYear()}_${d.getMonth()+1}`;
+    o.textContent=`${MN[d.getMonth()]} ${d.getFullYear()}`;
+    if(i===0) o.selected=true;
+    sel.appendChild(o);
+  }
+}
+function setMonth(){const v=document.getElementById('monthSelect').value.split('_'); curY=+v[0]; curM=+v[1]; renderAll();}
+function mLabel(){return `${MN[curM-1]} ${curY}`;}
+function daysIn(y,m){return new Date(y,m,0).getDate();}
+
+// ════════════════════════════════
+//  TABS
+// ════════════════════════════════
+function showTab(name,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active'); el.classList.add('active');
+  renderAll();
+}
+function showGrainTab(name,el){
+  ['schedule','types','billing'].forEach(n=>document.getElementById('grain-'+n).style.display=n===name?'block':'none');
+  document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
+  if(name==='schedule')renderGrainSchedule();
+  if(name==='types')renderGrainTypes();
+  if(name==='billing')renderGrainBilling();
+}
+
+// ════════════════════════════════
+//  PAYMENTS
+// ════════════════════════════════
+function clientTotal(c){return(c.horses||[]).reduce((s,h)=>s+(parseFloat(h.rate)||0),0);}
+function pKey(cid){return`${cid}_${curY}_${curM}`;}
+function getStatus(c){
+  const p=db.payments[pKey(c.id)];
+  if(p&&p.paid) return 'paid';
+  const now=new Date(), grace=new Date(curY,curM-1,(c.dueDay||1)+5);
+  if(!p&&now>grace&&(curY<now.getFullYear()||(curY===now.getFullYear()&&curM<=now.getMonth()+1))) return 'overdue';
+  return 'unpaid';
+}
+function togglePay(cid){
+  const k=pKey(cid), cur=db.payments[k];
+  db.payments[k]=(cur&&cur.paid)?{paid:false,paidDate:null}:{paid:true,paidDate:new Date().toISOString().split('T')[0]};
+  saveDB(); renderAll();
+}
+function venmoHref(c){
+  if(!c.venmo) return null;
+  const t=clientTotal(c);
+  return`venmo://paycharge?txn=request&recipients=${c.venmo}&amount=${t.toFixed(2)}&note=${encodeURIComponent('Horse board - '+mLabel())}`;
+}
+
+// ════════════════════════════════
+//  OVERVIEW
+// ════════════════════════════════
+function renderOverview(){
+  document.getElementById('overviewMonthLabel').textContent=mLabel();
+  let paid=0,unpaid=0,overdue=0,expected=0,received=0,od=[];
+  db.clients.forEach(c=>{const t=clientTotal(c),s=getStatus(c); expected+=t; if(s==='paid'){paid++;received+=t;}else if(s==='overdue'){overdue++;od.push(c.name);}else unpaid++;});
+  const mExp=db.expenses.filter(e=>{if(!e.date)return false; const d=new Date(e.date+'T12:00:00'); return d.getFullYear()===curY&&d.getMonth()+1===curM;});
+  const totalExp=mExp.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  const net=received-totalExp;
+  document.getElementById('overviewBanner').innerHTML=od.length?`<div class="alert-banner warning">⚠️ <strong>${od.length} past due:</strong> ${od.join(', ')}</div>`:'';
+  document.getElementById('statGrid').innerHTML=`
+    <div class="stat-card green"><div class="stat-label">Paid</div><div class="stat-value">${paid}</div><div class="stat-sub">$${received.toLocaleString()} received</div></div>
+    <div class="stat-card${unpaid>0?' amber':''}"><div class="stat-label">Unpaid</div><div class="stat-value">${unpaid}</div><div class="stat-sub">awaiting</div></div>
+    <div class="stat-card${overdue>0?' red':''}"><div class="stat-label">Past Due</div><div class="stat-value">${overdue}</div><div class="stat-sub">&gt;5-day grace</div></div>
+    <div class="stat-card"><div class="stat-label">Expected Revenue</div><div class="stat-value" style="font-size:22px;">$${expected.toLocaleString()}</div><div class="stat-sub">${mLabel()}</div></div>
+    <div class="stat-card${net>=0?' green':' red'}"><div class="stat-label">Net</div><div class="stat-value" style="font-size:22px;">${net>=0?'+':''}$${Math.abs(net).toLocaleString()}</div><div class="stat-sub">$${totalExp.toFixed(0)} expenses</div></div>`;
+  const el=document.getElementById('overviewList');
+  if(!db.clients.length){el.innerHTML='<div class="empty"><div class="ei">🐴</div><p>No clients yet.</p></div>';return;}
+  el.innerHTML=db.clients.map(c=>{
+    const s=getStatus(c),p=db.payments[pKey(c.id)],t=clientTotal(c);
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 2px;border-bottom:1px solid #f0ece6;flex-wrap:wrap;gap:8px;">
+      <div><span style="font-weight:600;">${esc(c.name)}</span><span style="color:#a09888;font-size:13px;margin-left:8px;">${(c.horses||[]).map(h=>h.name).join(', ')}</span></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        ${t>0?`<span style="font-size:13px;font-weight:700;">$${t.toLocaleString()}/mo</span>`:''}
+        ${p&&p.paidDate?`<span style="font-size:12px;color:#a09888;">paid ${p.paidDate}</span>`:`<span style="font-size:12px;color:#a09888;">due ${c.dueDay===15||c.dueDay==='15'?'15th':'1st'}</span>`}
+        <span class="badge ${s}">${s==='paid'?'✓ Paid':s==='overdue'?'⚠ Past Due':'· Unpaid'}</span>
+      </div></div>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+//  CLIENTS TABLE
+// ════════════════════════════════
+function renderClients(){
+  const tbody=document.getElementById('clientBody'), empty=document.getElementById('clientEmpty');
+  if(!db.clients.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=db.clients.map(c=>{
+    const s=getStatus(c),isPaid=s==='paid',t=clientTotal(c),vLink=venmoHref(c);
+    const chips=(c.horses||[]).map(h=>`<span class="hchip ${h.location}">${h.location==='pasture'?'🌿':'🏠'} ${esc(h.name)}</span>`).join('');
+    const rateRows=(c.horses||[]).map(h=>`
+      <div class="rate-row">
+        <span class="rate-horse-name" title="${esc(h.name)}">${esc(h.name)}</span>
+        <span style="font-size:12px;color:#a09888;">$</span>
+        <input class="rate-input${h.location==='pasture'?' pasture-rate':''}" type="number" min="0" step="5"
+               value="${h.rate||''}" placeholder="0"
+               onchange="saveRate('${c.id}','${h.id}',this)"
+               onblur="saveRate('${c.id}','${h.id}',this)">
+      </div>`).join('');
+    const venmoCell=`<div id="vCell_${c.id}">
+      <div id="vDisplay_${c.id}" ${c.venmo?'':'style="display:none"'}>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="venmo-display" onclick="openVenmoEdit('${c.id}')">@${esc(c.venmo||'')}</span>
+          ${vLink?`<a href="${vLink}" class="btn btn-venmo btn-sm">💙 Request</a>`:''}
+        </div>
+      </div>
+      <span id="vUnset_${c.id}" class="venmo-unset" ${c.venmo?'style="display:none"':''} onclick="openVenmoEdit('${c.id}')">＋ Add Venmo @</span>
+      <div class="venmo-edit-wrap" id="vEdit_${c.id}">
+        <span style="font-size:13px;color:#008CFF;font-weight:600;">@</span>
+        <input class="venmo-input" id="vInput_${c.id}" type="text" placeholder="username" value="${esc(c.venmo||'')}"
+               onkeydown="if(event.key==='Enter')saveVenmo('${c.id}');if(event.key==='Escape')closeVenmoEdit('${c.id}')">
+        <button class="btn btn-primary btn-sm" onclick="saveVenmo('${c.id}')">Save</button>
+        <button class="btn btn-secondary btn-sm" onclick="closeVenmoEdit('${c.id}')">✕</button>
+      </div></div>`;
+    return`<tr class="${s==='overdue'?'row-overdue':''}">
+      <td><div style="font-weight:600;">${esc(c.name)}</div>${c.contact?`<div style="font-size:12px;color:#a09888;">${esc(c.contact)}</div>`:''}<div style="margin-top:4px;font-size:11px;color:#b8b0a6;">${c.dueDay===15||c.dueDay==='15'?'Due 15th':'Due 1st'}</div></td>
+      <td><div class="horse-chips">${chips}</div></td>
+      <td>${rateRows}${t>0?`<div style="margin-top:6px;font-size:12px;color:#6b6358;border-top:1px solid #f0ece6;padding-top:5px;">Total: <strong>$${t.toLocaleString()}/mo</strong></div>`:''}</td>
+      <td>${venmoCell}</td>
+      <td style="font-size:13px;">${c.dueDay===15||c.dueDay==='15'?'15th':'1st'}</td>
+      <td><span class="badge ${s}">${s==='paid'?'✓ Paid':s==='overdue'?'⚠ Past Due':'· Unpaid'}</span></td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-pay${isPaid?' is-paid':''}" onclick="togglePay('${c.id}')">${isPaid?'↩ Unmark':'✓ Mark Paid'}</button>
+        <button class="btn btn-icon" onclick="openEditClient('${c.id}')">✏️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function saveRate(cid,hid,input){
+  const c=db.clients.find(x=>x.id===cid); if(!c)return;
+  const h=c.horses.find(x=>x.id===hid); if(!h)return;
+  h.rate=parseFloat(input.value)||0;
+  saveDB();
+  input.classList.remove('rate-saved-flash'); void input.offsetWidth; input.classList.add('rate-saved-flash');
+  renderOverview();
+}
+function openVenmoEdit(cid){
+  document.getElementById('vDisplay_'+cid).style.display='none';
+  document.getElementById('vUnset_'+cid).style.display='none';
+  document.getElementById('vEdit_'+cid).classList.add('open');
+  setTimeout(()=>document.getElementById('vInput_'+cid)?.focus(),50);
+}
+function closeVenmoEdit(cid){
+  const c=db.clients.find(x=>x.id===cid); if(!c)return;
+  document.getElementById('vEdit_'+cid).classList.remove('open');
+  if(c.venmo){document.getElementById('vDisplay_'+cid).style.display='block';document.getElementById('vUnset_'+cid).style.display='none';}
+  else{document.getElementById('vDisplay_'+cid).style.display='none';document.getElementById('vUnset_'+cid).style.display='inline-block';}
+}
+function saveVenmo(cid){
+  const c=db.clients.find(x=>x.id===cid); if(!c)return;
+  c.venmo=document.getElementById('vInput_'+cid).value.trim().replace(/^@/,'');
+  saveDB(); renderClients();
+}
+
+// ── Client modal ──
+let hrCount=0;
+function openAddClient(){
+  document.getElementById('clientModalTitle').textContent='Add Client';
+  document.getElementById('cf_id').value='';
+  ['cf_name','cf_venmo','cf_contact'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cf_dueDay').value='1';
+  document.getElementById('btnDeleteClient').style.display='none';
+  document.getElementById('horseRows').innerHTML=''; hrCount=0; addHorseRow();
+  openModal('modalClient');
+}
+function openEditClient(id){
+  const c=db.clients.find(x=>x.id===id); if(!c)return;
+  document.getElementById('clientModalTitle').textContent='Edit Client';
+  document.getElementById('cf_id').value=c.id;
+  document.getElementById('cf_name').value=c.name;
+  document.getElementById('cf_venmo').value=c.venmo||'';
+  document.getElementById('cf_contact').value=c.contact||'';
+  document.getElementById('cf_dueDay').value=c.dueDay||1;
+  document.getElementById('btnDeleteClient').style.display='inline-flex';
+  document.getElementById('horseRows').innerHTML=''; hrCount=0;
+  (c.horses||[]).forEach(h=>addHorseRow(h));
+  if(!(c.horses||[]).length) addHorseRow();
+  openModal('modalClient');
+}
+function addHorseRow(h){
+  const i=hrCount++;
+  const d=document.createElement('div');
+  d.className='horse-row'; d.id='hr_'+i;
+  d.innerHTML=`
+    <div class="form-group" style="flex:2;min-width:95px;"><label>Horse Name *</label><input type="text" id="hn_${i}" value="${esc(h?.name||'')}" placeholder="Blaze"></div>
+    <div class="form-group" style="min-width:90px;"><label>Location</label><select id="hl_${i}"><option value="stall" ${(!h||h.location==='stall')?'selected':''}>🏠 Stall</option><option value="pasture" ${h?.location==='pasture'?'selected':''}>🌿 Pasture</option></select></div>
+    <div class="form-group" style="min-width:60px;"><label>Stall #</label><input type="text" id="hs_${i}" value="${esc(h?.stallNum||'')}" placeholder="—" style="max-width:60px;"></div>
+    <div class="form-group" style="min-width:85px;"><label>Rate ($/mo)</label><input type="number" id="hr_${i}" value="${h?.rate||''}" placeholder="0" min="0" style="max-width:85px;"></div>
+    <input type="hidden" id="hid_${i}" value="${h?.id||''}">`;
+  const btn=document.createElement('button');
+  btn.className='btn btn-danger btn-sm'; btn.textContent='✕'; btn.style.alignSelf='flex-end';
+  btn.onclick=()=>d.remove();
+  d.appendChild(btn);
+  document.getElementById('horseRows').appendChild(d);
+}
+function collectHorses(){
+  const rows=document.querySelectorAll('#horseRows .horse-row'), horses=[];
+  rows.forEach(row=>{
+    const i=row.id.replace('hr_','');
+    const name=document.getElementById('hn_'+i)?.value.trim(); if(!name)return;
+    horses.push({id:document.getElementById('hid_'+i)?.value||uid(),name,location:document.getElementById('hl_'+i)?.value||'stall',stallNum:document.getElementById('hs_'+i)?.value.trim()||'',rate:parseFloat(document.getElementById('hr_'+i)?.value)||0});
+  });
+  return horses;
+}
+function saveClient(){
+  const id=document.getElementById('cf_id').value, name=document.getElementById('cf_name').value.trim();
+  if(!name){alert('Please enter a client name.');return;}
+  const horses=collectHorses(); if(!horses.length){alert('Add at least one horse.');return;}
+  const data={name,venmo:document.getElementById('cf_venmo').value.trim().replace('@',''),contact:document.getElementById('cf_contact').value.trim(),dueDay:parseInt(document.getElementById('cf_dueDay').value),horses};
+  if(id){const idx=db.clients.findIndex(x=>x.id===id); if(idx>-1)db.clients[idx]={...db.clients[idx],...data};}
+  else db.clients.push({id:uid(),...data});
+  saveDB(); closeModal('modalClient'); renderAll();
+}
+function deleteClient(){
+  const id=document.getElementById('cf_id').value;
+  if(!confirm('Delete this client and all their records?'))return;
+  const c=db.clients.find(x=>x.id===id);
+  const hIds=new Set((c?.horses||[]).map(h=>h.id));
+  db.clients=db.clients.filter(x=>x.id!==id);
+  Object.keys(db.payments).forEach(k=>{if(k.startsWith(id+'_'))delete db.payments[k];});
+  Object.keys(db.grainSchedule).forEach(k=>{if(hIds.has(k.split('_')[0]))delete db.grainSchedule[k];});
+  saveDB(); closeModal('modalClient'); renderAll();
+}
+
+// ════════════════════════════════
+//  EXPENSES
+// ════════════════════════════════
+const CE={feed:'🌾',bedding:'🛏',vet:'🩺',farrier:'🔨',supplies:'🧰',equipment:'⚙️',utilities:'💡',other:'📦'};
+const CL={feed:'Feed / Grain',bedding:'Bedding',vet:'Veterinary',farrier:'Farrier',supplies:'Supplies',equipment:'Equipment',utilities:'Utilities',other:'Other'};
+
+function renderExpenses(){
+  const mExp=db.expenses.filter(e=>{if(!e.date)return false;const d=new Date(e.date+'T12:00:00');return d.getFullYear()===curY&&d.getMonth()+1===curM;}).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const total=mExp.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  const cats={};
+  mExp.forEach(e=>{cats[e.category]=(cats[e.category]||0)+(parseFloat(e.amount)||0);});
+  document.getElementById('expenseSummary').innerHTML=`<div class="stat-card"><div class="stat-label">Total This Month</div><div class="stat-value" style="color:#c0392b;font-size:22px;">$${total.toFixed(2)}</div><div class="stat-sub">${mExp.length} transactions</div></div>`+Object.entries(cats).map(([c,a])=>`<div class="stat-card"><div class="stat-label">${CE[c]||'📦'} ${CL[c]||c}</div><div class="stat-value" style="font-size:18px;">$${a.toFixed(2)}</div></div>`).join('');
+  const el=document.getElementById('expenseList');
+  if(!mExp.length){el.innerHTML=`<div class="empty"><div class="ei">💰</div><p>No expenses for ${mLabel()}.</p></div>`;return;}
+  el.innerHTML=mExp.map(e=>`<div class="expense-item">
+    <div class="exp-icon">${CE[e.category]||'📦'}</div>
+    <div class="exp-info"><div class="exp-vendor">${esc(e.vendor)}</div><div class="exp-meta">${e.date} · ${CL[e.category]||e.category}${e.notes?' · '+esc(e.notes):''}</div></div>
+    <div class="exp-amount">−$${parseFloat(e.amount).toFixed(2)}</div>
+    <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">✕</button>
+  </div>`).join('');
+}
+
+let currentReceiptDataUrl = null;
+
+function openAddExpense(pf){
+  document.getElementById('ex_vendor').value=pf?.vendor||'';
+  document.getElementById('ex_amount').value=pf?.amount||'';
+  document.getElementById('ex_date').value=pf?.date||new Date().toISOString().split('T')[0];
+  document.getElementById('ex_cat').value=pf?.category||'feed';
+  document.getElementById('ex_notes').value=pf?.notes||'';
+  const thumb=document.getElementById('expenseReceiptThumb');
+  if(currentReceiptDataUrl){thumb.src=currentReceiptDataUrl;thumb.style.display='block';}
+  else thumb.style.display='none';
+  openModal('modalExpense');
+}
+function saveExpense(){
+  const vendor=document.getElementById('ex_vendor').value.trim(), amount=document.getElementById('ex_amount').value, date=document.getElementById('ex_date').value;
+  if(!vendor||!amount||!date){alert('Fill in Vendor, Amount, and Date.');return;}
+  db.expenses.push({id:uid(),vendor,amount:parseFloat(amount),date,category:document.getElementById('ex_cat').value,notes:document.getElementById('ex_notes').value.trim()});
+  currentReceiptDataUrl=null;
+  saveDB(); closeModal('modalExpense'); renderAll();
+}
+function deleteExpense(id){
+  if(!confirm('Delete this expense?'))return;
+  db.expenses=db.expenses.filter(e=>e.id!==id); saveDB(); renderAll();
+}
+function handleDragOver(e){e.preventDefault();document.getElementById('uploadZone').classList.add('dragover');}
+function handleDrop(e){
+  e.preventDefault();document.getElementById('uploadZone').classList.remove('dragover');
+  const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))previewReceipt(f);
+}
+function handleReceiptUpload(e){const f=e.target.files[0];if(f)previewReceipt(f);e.target.value='';}
+function previewReceipt(file){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    currentReceiptDataUrl=ev.target.result;
+    const prev=document.getElementById('receiptPreview');
+    prev.src=ev.target.result; prev.style.display='block';
+    openAddExpense();
+  };
+  reader.readAsDataURL(file);
+}
+
+// ════════════════════════════════
+//  GRAIN
+// ════════════════════════════════
+function allHorses(){return db.clients.flatMap(c=>(c.horses||[]).map(h=>({...h,clientName:c.name,clientId:c.id})));}
+
+function renderGrainSchedule(){
+  const gts=db.grainTypes,horses=allHorses();
+  const head=document.getElementById('grainHead'),body=document.getElementById('grainBody');
+  if(!gts.length){head.innerHTML='<th>Horse</th><th>Owner</th>';body.innerHTML='<tr><td colspan="2"><div class="empty" style="padding:16px;"><div class="ei">🌾</div><p>Add grain types first.</p></div></td></tr>';return;}
+  head.innerHTML='<th>Horse</th><th>Owner</th>'+gts.map(g=>`<th>${esc(g.name)}<br><small style="font-weight:400;color:#a09888;font-size:10px;">lbs/day</small></th>`).join('');
+  if(!horses.length){body.innerHTML=`<tr><td colspan="${2+gts.length}"><div class="empty" style="padding:16px;"><p>No horses yet.</p></div></td></tr>`;return;}
+  body.innerHTML=horses.map(h=>`<tr>
+    <td><strong>${esc(h.name)}</strong> <span class="badge ${h.location}" style="margin-left:4px;">${h.location==='pasture'?'Pasture':'Stall'}</span></td>
+    <td style="color:#6b6358;">${esc(h.clientName)}</td>
+    ${gts.map(g=>{const k=`${h.id}_${g.id}`;return`<td><input type="number" step="0.25" min="0" max="50" value="${db.grainSchedule[k]||''}" data-key="${k}" placeholder="—"></td>`;}).join('')}
+  </tr>`).join('');
+}
+function saveGrainSchedule(){
+  document.querySelectorAll('#grainBody input[data-key]').forEach(inp=>{
+    const k=inp.getAttribute('data-key'),v=parseFloat(inp.value);
+    if(!isNaN(v)&&v>0)db.grainSchedule[k]=v;else delete db.grainSchedule[k];
+  });
+  saveDB();alert('Feed schedule saved ✓');
+}
+
+function renderGrainTypes(){
+  const el=document.getElementById('grainTypeList');
+  if(!db.grainTypes.length){el.innerHTML='<div class="empty" style="padding:16px;"><div class="ei">🌾</div><p>No grain types yet.</p></div>';return;}
+  el.innerHTML=db.grainTypes.map(g=>{
+    const cost=parseFloat(g.costPerLb||0),charge=parseFloat(g.chargePerLb||0),margin=charge-cost;
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0ece6;flex-wrap:wrap;gap:8px;">
+      <div>
+        <span style="font-weight:600;font-size:15px;">${esc(g.name)}</span>
+        <div style="margin-top:4px;display:flex;gap:16px;flex-wrap:wrap;">
+          <span style="font-size:13px;color:#6b6358;">Your cost: <strong>$${cost.toFixed(3)}/lb</strong></span>
+          <span style="font-size:13px;color:#6b6358;">Client charge: <strong>$${charge.toFixed(3)}/lb</strong></span>
+          ${cost>0||charge>0?`<span style="font-size:13px;color:${margin>=0?'#2d7a4f':'#c0392b'};">Margin: <strong>${margin>=0?'+':''}$${margin.toFixed(3)}/lb</strong></span>`:''}
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="openEditGrainType('${g.id}')">✏️ Edit</button>
+    </div>`;
+  }).join('');
+}
+function openAddGrainType(){
+  document.getElementById('grainTypeModalTitle').textContent='Add Grain Type';
+  document.getElementById('btnSaveGrain').textContent='Add Grain Type';
+  document.getElementById('btnDeleteGrain').style.display='none';
+  document.getElementById('gt_id').value='';
+  ['gt_name','gt_cost','gt_charge'].forEach(id=>document.getElementById(id).value='');
+  openModal('modalGrainType');
+}
+function openEditGrainType(id){
+  const g=db.grainTypes.find(x=>x.id===id);if(!g)return;
+  document.getElementById('grainTypeModalTitle').textContent='Edit Grain Type';
+  document.getElementById('btnSaveGrain').textContent='Save Changes';
+  document.getElementById('btnDeleteGrain').style.display='inline-flex';
+  document.getElementById('gt_id').value=g.id;
+  document.getElementById('gt_name').value=g.name;
+  document.getElementById('gt_cost').value=g.costPerLb||'';
+  document.getElementById('gt_charge').value=g.chargePerLb||'';
+  openModal('modalGrainType');
+}
+function saveGrainType(){
+  const name=document.getElementById('gt_name').value.trim();if(!name){alert('Enter a grain name.');return;}
+  const id=document.getElementById('gt_id').value;
+  const data={name,costPerLb:parseFloat(document.getElementById('gt_cost').value)||0,chargePerLb:parseFloat(document.getElementById('gt_charge').value)||0};
+  if(id){const idx=db.grainTypes.findIndex(x=>x.id===id);if(idx>-1)db.grainTypes[idx]={...db.grainTypes[idx],...data};}
+  else db.grainTypes.push({id:uid(),...data});
+  saveDB();closeModal('modalGrainType');renderGrainTypes();renderGrainSchedule();
+}
+function deleteGrainTypeFromModal(){
+  const id=document.getElementById('gt_id').value;if(!id)return;
+  if(!confirm('Delete this grain type?'))return;
+  db.grainTypes=db.grainTypes.filter(g=>g.id!==id);
+  Object.keys(db.grainSchedule).forEach(k=>{if(k.endsWith('_'+id))delete db.grainSchedule[k];});
+  saveDB();closeModal('modalGrainType');renderGrainTypes();renderGrainSchedule();
+}
+
+function renderGrainBilling(){
+  document.getElementById('grainBillingLabel').textContent=mLabel();
+  const days=daysIn(curY,curM),rows=[];
+  db.clients.forEach(c=>{(c.horses||[]).forEach(h=>{db.grainTypes.forEach(g=>{const lbs=db.grainSchedule[`${h.id}_${g.id}`];if(!lbs)return;const totalLbs=lbs*days,bill=totalLbs*(parseFloat(g.chargePerLb)||0);rows.push({clientName:c.name,horseName:h.name,grainName:g.name,lbs,days,totalLbs,costPerLb:parseFloat(g.costPerLb)||0,chargePerLb:parseFloat(g.chargePerLb)||0,bill});});});});
+  const tbody=document.getElementById('grainBillingBody');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="9"><div class="empty" style="padding:16px;"><p>No grain scheduled yet.</p></div></td></tr>';return;}
+  const grand=rows.reduce((s,r)=>s+r.bill,0);
+  tbody.innerHTML=rows.map(r=>`<tr><td>${esc(r.clientName)}</td><td>${esc(r.horseName)}</td><td>${esc(r.grainName)}</td><td>${r.lbs}</td><td>${r.days}</td><td>${r.totalLbs.toFixed(1)}</td><td>$${r.costPerLb.toFixed(3)}</td><td>$${r.chargePerLb.toFixed(3)}</td><td><strong>$${r.bill.toFixed(2)}</strong></td></tr>`).join('')+`<tr style="background:#f5f3ee;font-weight:700;"><td colspan="8" style="text-align:right;padding:10px 12px;">Total Grain to Bill:</td><td style="padding:10px 12px;">$${grand.toFixed(2)}</td></tr>`;
+}
+
+// ════════════════════════════════
+//  MODAL & UTIL
+// ════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeModal(this.id);}));
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function renderAll(){renderOverview();renderClients();renderExpenses();}
+
+// ════════════════════════════════
+//  INIT
+// ════════════════════════════════
+initMonth();
+init();
+</script>
+</body>
+</html>
