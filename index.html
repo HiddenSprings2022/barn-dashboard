@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Stables at Hidden Springs</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f3ee; color: #2d2a25; min-height: 100vh; }
+
+  /* ── Save status bar ── */
+  .sync-bar { background: #3d3930; color: #f5f3ee; padding: 6px 24px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #a09888; display: inline-block; margin-right: 6px; }
+  .sync-dot.green { background: #4caf50; }
+  .sync-dot.yellow { background: #ff9800; animation: pulse .8s ease infinite; }
+  .sync-dot.red { background: #e53935; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .sync-btn { background: none; border: 1px solid #5a5248; color: #c9b99a; padding: 3px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+  .sync-btn:hover { background: #4d4840; }
+
+  /* ── Header ── */
+  .header { background: #2d2a25; color: #f5f3ee; padding: 14px 24px; display: flex; align-items: center; gap: 14px; }
+  .header-estd { font-size: 10px; letter-spacing: 2px; color: #a09888; font-variant: small-caps; }
+  .header-name { font-size: 13px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; line-height: 1.2; }
+  .header-script { font-size: 18px; font-style: italic; color: #c9b99a; font-family: Georgia, serif; letter-spacing: .5px; line-height: 1; margin-top: 2px; }
+
+  .month-bar { background: #3d3930; color: #f5f3ee; padding: 8px 24px; display: flex; align-items: center; gap: 12px; font-size: 14px; }
+  .month-bar select { background: #4d4840; color: #f5f3ee; border: none; border-radius: 6px; padding: 4px 8px; font-size: 14px; cursor: pointer; }
+  .month-bar label { color: #a09888; }
+
+  .tabs { background: #fff; border-bottom: 1px solid #e8e3db; display: flex; padding: 0 24px; overflow-x: auto; }
+  .tab { padding: 12px 20px; font-size: 14px; font-weight: 500; cursor: pointer; color: #6b6358; border-bottom: 2px solid transparent; transition: all .15s; white-space: nowrap; }
+  .tab:hover { color: #2d2a25; }
+  .tab.active { color: #8b5e3c; border-bottom-color: #8b5e3c; }
+
+  .content { padding: 24px; max-width: 1100px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .card { background: #fff; border-radius: 12px; border: 1px solid #e8e3db; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 12px; font-weight: 700; color: #6b6358; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 14px; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: #fff; border-radius: 12px; border: 1px solid #e8e3db; padding: 16px; }
+  .stat-label { font-size: 12px; color: #6b6358; font-weight: 500; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: #2d2a25; }
+  .stat-sub { font-size: 12px; color: #a09888; margin-top: 4px; }
+  .stat-card.green .stat-value { color: #2d7a4f; }
+  .stat-card.red .stat-value { color: #c0392b; }
+  .stat-card.amber .stat-value { color: #b8860b; }
+
+  .alert-banner { border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+  .alert-banner.warning { background: #fef3cd; border: 1px solid #f0c040; color: #7d6008; }
+
+  .ctable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .ctable th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; color: #6b6358; text-transform: uppercase; letter-spacing: .6px; border-bottom: 2px solid #e8e3db; background: #faf8f5; white-space: nowrap; }
+  .ctable td { padding: 11px 14px; border-bottom: 1px solid #f0ece6; vertical-align: top; }
+  .ctable tr:last-child td { border-bottom: none; }
+  .ctable tr:hover td { background: #faf8f5; }
+  .ctable tr.row-overdue td { background: #fffbf0; }
+
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge.paid    { background: #d4edda; color: #1a5c30; }
+  .badge.unpaid  { background: #f0ece6; color: #5a5248; }
+  .badge.overdue { background: #fff3cd; color: #7d4e00; }
+  .badge.stall   { background: #ede9f5; color: #4a1a6b; font-size: 11px; }
+  .badge.pasture { background: #e6f4ec; color: #1a4a30; font-size: 11px; }
+
+  .horse-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .hchip { display: inline-flex; align-items: center; gap: 3px; background: #f0ece6; border-radius: 6px; padding: 3px 8px; font-size: 12px; color: #3a3530; white-space: nowrap; }
+  .hchip.pasture { background: #e6f4ec; color: #1a4a30; }
+
+  /* Inline rate editing */
+  .rate-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .rate-row:last-child { margin-bottom: 0; }
+  .rate-horse-name { font-size: 12px; color: #6b6358; width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rate-input { width: 80px; border: 1px solid #d8d3cc; border-radius: 6px; padding: 4px 8px; font-size: 13px; font-weight: 600; color: #2d2a25; background: #fff; transition: border-color .15s; }
+  .rate-input:focus { outline: none; border-color: #8b5e3c; box-shadow: 0 0 0 2px rgba(139,94,60,.1); }
+  .rate-input.pasture-rate { background: #f0faf4; }
+  .rate-saved-flash { animation: flashGreen .6s ease; }
+  @keyframes flashGreen { 0%,100%{border-color:#d8d3cc} 40%{border-color:#2d7a4f; background:#f0faf4;} }
+
+  /* Venmo inline */
+  .venmo-display { font-size: 13px; color: #008CFF; font-weight: 600; cursor: pointer; }
+  .venmo-display:hover { text-decoration: underline; }
+  .venmo-unset { font-size: 12px; color: #a09888; cursor: pointer; border: 1px dashed #d8d3cc; border-radius: 6px; padding: 3px 8px; transition: all .15s; display: inline-block; }
+  .venmo-unset:hover { border-color: #008CFF; color: #008CFF; background: #f0f8ff; }
+  .venmo-edit-wrap { display: none; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .venmo-edit-wrap.open { display: flex; }
+  .venmo-input { width: 120px; border: 1px solid #008CFF; border-radius: 6px; padding: 4px 8px; font-size: 13px; }
+  .venmo-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(0,140,255,.15); }
+
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; text-decoration: none; }
+  .btn-primary   { background: #8b5e3c; color: #fff; }
+  .btn-primary:hover { background: #7a5234; }
+  .btn-venmo     { background: #008CFF; color: #fff !important; font-size: 12px; padding: 4px 10px; }
+  .btn-venmo:hover { background: #006fd6; }
+  .btn-pay       { background: #e8f5e9; color: #1a5c30; font-size: 12px; padding: 5px 12px; font-weight: 600; }
+  .btn-pay.is-paid { background: #fdecea; color: #7b1a1a; }
+  .btn-pay:hover { opacity: .85; }
+  .btn-secondary { background: #f0ece6; color: #2d2a25; }
+  .btn-secondary:hover { background: #e8e3db; }
+  .btn-danger    { background: #fdecea; color: #7b1a1a; }
+  .btn-danger:hover { background: #f5d0cc; }
+  .btn-sm   { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
+  .btn-icon { background: none; color: #6b6358; padding: 4px 8px; font-size: 15px; }
+  .btn-icon:hover { background: #f0ece6; border-radius: 6px; }
+
+  .form-row   { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: #6b6358; }
+  .form-group input,
+  .form-group select,
+  .form-group textarea { border: 1px solid #d8d3cc; border-radius: 8px; padding: 8px 10px; font-size: 14px; color: #2d2a25; background: #fff; font-family: inherit; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus
+    { outline: none; border-color: #8b5e3c; box-shadow: 0 0 0 3px rgba(139,94,60,.12); }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 16px; padding: 24px; width: 560px; max-width: 96vw; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.22); }
+  .modal.modal-wide { width: 720px; }
+  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+  .modal-footer { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+  /* Receipt AI scan */
+  .receipt-review-img { max-width:100%; max-height:220px; border-radius:10px; object-fit:contain; display:block; margin:0 auto 16px; border:1px solid #e8e3dc; }
+  .receipt-item-row { display:flex; gap:6px; align-items:center; margin-bottom:8px; padding:8px 10px; background:#faf8f5; border-radius:8px; flex-wrap:wrap; }
+  .receipt-item-row .ri-desc { flex:3; min-width:120px; }
+  .receipt-item-row .ri-amt  { flex:1; min-width:72px; max-width:90px; }
+  .receipt-item-row .ri-cat  { flex:2; min-width:110px; }
+  .scan-loading { text-align:center; padding:24px; color:#6b6358; }
+  .scan-loading .spin { display:inline-block; font-size:28px; animation:spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .upload-zone.scanning { border-color:#8b5e3c; background:#f5f0ea; pointer-events:none; }
+  .scan-setup-note { font-size:12px; color:#8b5e3c; margin-top:8px; cursor:pointer; text-decoration:underline; }
+  /* Expense thumbnail */
+  .exp-thumb { width:38px; height:38px; border-radius:6px; object-fit:cover; cursor:pointer; flex-shrink:0; border:1px solid #e8e3dc; }
+  .exp-thumb-full { max-width:100%; max-height:80vh; border-radius:10px; display:block; margin:0 auto; }
+  .divider { border: none; border-top: 1px solid #e8e3db; margin: 14px 0; }
+
+  .horse-row { display: flex; gap: 8px; align-items: flex-end; padding: 10px; background: #faf8f5; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e8e3db; flex-wrap: wrap; }
+  .horse-row .form-group { min-width: 90px; }
+
+  .expense-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; border: 1px solid #e8e3db; margin-bottom: 8px; background: #fff; }
+  .exp-icon  { width: 38px; height: 38px; border-radius: 10px; background: #f0ece6; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .exp-info  { flex: 1; min-width: 0; }
+  .exp-vendor { font-size: 14px; font-weight: 600; }
+  .exp-meta   { font-size: 12px; color: #6b6358; margin-top: 2px; }
+  .exp-amount { font-size: 16px; font-weight: 700; color: #c0392b; white-space: nowrap; }
+
+  .upload-zone { border: 2px dashed #d8d3cc; border-radius: 12px; padding: 28px; text-align: center; cursor: pointer; transition: all .15s; background: #faf8f5; }
+  .upload-zone:hover, .upload-zone.dragover { border-color: #8b5e3c; background: #f5f0ea; }
+  .upload-zone input { display: none; }
+  .receipt-preview { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 12px; display: none; }
+
+  .gtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .gtable th { text-align: left; padding: 9px 12px; font-size: 11px; font-weight: 700; color: #6b6358; text-transform: uppercase; letter-spacing: .5px; border-bottom: 2px solid #e8e3db; background: #faf8f5; white-space: nowrap; }
+  .gtable td { padding: 9px 12px; border-bottom: 1px solid #f0ece6; vertical-align: middle; }
+  .gtable tr:last-child td { border-bottom: none; }
+  .gtable input[type=number] { border: 1px solid #d8d3cc; border-radius: 6px; padding: 4px 8px; font-size: 13px; width: 70px; }
+
+  /* ── Grain schedule cards ── */
+  .grain-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; margin-bottom: 16px; }
+  .hgcard { background: #fff; border: 1px solid #e8e3db; border-radius: 12px; padding: 16px; }
+  .hgcard-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .hgcard-name { font-size: 15px; font-weight: 700; }
+  .hgcard-owner { font-size: 12px; color: #a09888; margin-top: 1px; }
+  .grain-feed-row { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+  .grain-type-select { flex: 1; min-width: 0; border: 1px solid #d8d3cc; border-radius: 7px; padding: 6px 8px; font-size: 13px; background: #fff; cursor: pointer; }
+  .grain-type-select:focus { outline: none; border-color: #8b5e3c; }
+  .grain-lbs-input { width: 64px; border: 1px solid #d8d3cc; border-radius: 7px; padding: 6px 8px; font-size: 13px; text-align: right; }
+  .grain-lbs-input:focus { outline: none; border-color: #8b5e3c; }
+  .grain-lbs-label { font-size: 11px; color: #a09888; white-space: nowrap; }
+  .hgcard-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0ece6; }
+  .hgcard-totals { display: flex; gap: 14px; flex-wrap: wrap; }
+  .hgcard-total { text-align: center; }
+  .hgcard-total-val { font-size: 15px; font-weight: 700; color: #2d2a25; }
+  .hgcard-total-val.cost  { color: #c0392b; }
+  .hgcard-total-val.charge { color: #2d7a4f; }
+  .hgcard-total-lbl { font-size: 10px; color: #a09888; text-transform: uppercase; letter-spacing: .4px; margin-top: 1px; }
+  .grain-daily-summary { background: #2d2a25; color: #f5f3ee; border-radius: 12px; padding: 16px 20px; display: flex; gap: 24px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+  .gds-item { text-align: center; }
+  .gds-val { font-size: 20px; font-weight: 700; }
+  .gds-lbl { font-size: 11px; color: #a09888; margin-top: 2px; }
+  /* Feed Transitions */
+  .tr-card { background:#fff; border:1px solid #e8d5a8; border-radius:12px; padding:16px; margin-bottom:12px; position:relative; }
+  .tr-card.complete { border-color:#c8e6c9; background:#f9fff9; opacity:.85; }
+  .tr-card.cancelled { opacity:.5; }
+  .tr-horse { font-size:15px; font-weight:700; color:#3d3930; }
+  .tr-client { font-size:12px; color:#a09888; }
+  .tr-label { font-size:12px; color:#8b5e3c; font-weight:600; margin-top:2px; }
+  .tr-prog-wrap { margin:10px 0 6px; }
+  .tr-prog-bar { background:#f0ece6; border-radius:6px; height:10px; overflow:hidden; }
+  .tr-prog-fill { height:10px; border-radius:6px; background:linear-gradient(90deg,#c8a96e,#8b5e3c); transition:width .4s; }
+  .tr-prog-label { font-size:12px; color:#6b6358; margin-top:4px; }
+  .tr-today { background:#fffbf0; border:1px solid #f0d890; border-radius:8px; padding:10px 12px; margin:10px 0; }
+  .tr-today-title { font-size:11px; font-weight:700; color:#7a6030; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+  .tr-feed-row { display:flex; justify-content:space-between; font-size:13px; padding:2px 0; }
+  .tr-feed-old { color:#c62828; }
+  .tr-feed-new { color:#2e7d32; }
+  .tr-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .transition-badge { display:inline-block; background:#ff9800; color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; margin-left:6px; vertical-align:middle; animation:pulse .8s ease infinite; }
+  /* Transition modal */
+  .tr-section { margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f0ece6; }
+  .tr-section:last-child { border-bottom:none; }
+  .tr-section-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#8b5e3c; margin-bottom:10px; }
+  .tr-feed-input-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+  .tr-feed-input-row select { flex:2; }
+  .tr-feed-input-row input { flex:1; max-width:80px; }
+  .ramp-options { display:flex; gap:8px; flex-wrap:wrap; }
+  .ramp-option { flex:1; min-width:130px; border:2px solid #e8e3dc; border-radius:10px; padding:10px; cursor:pointer; text-align:center; transition:all .15s; }
+  .ramp-option:hover { border-color:#c8a96e; }
+  .ramp-option.selected { border-color:#8b5e3c; background:#fdf8f0; }
+  .ramp-option-name { font-weight:700; font-size:13px; color:#3d3930; }
+  .ramp-option-desc { font-size:11px; color:#6b6358; margin-top:3px; }
+  .tr-preview { background:#faf8f5; border-radius:8px; padding:12px; font-size:13px; }
+  .tr-preview-row { display:flex; justify-content:space-between; gap:8px; margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid #f0ece6; }
+  .tr-preview-row:last-child { border-bottom:none; margin-bottom:0; }
+  .tr-preview-day { font-weight:700; color:#3d3930; min-width:70px; }
+
+  /* ── Recurring expenses ── */
+  .recurring-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0ece6; gap: 10px; flex-wrap: wrap; }
+  .recurring-row:last-child { border-bottom: none; }
+  .recurring-name  { font-weight: 600; font-size: 14px; }
+  .recurring-notes { font-size: 12px; color: #6b6358; margin-top: 2px; }
+  .recurring-right { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+  .recurring-amt   { font-size: 15px; font-weight: 700; color: #c0392b; }
+  .recurring-inactive { opacity: .45; }
+  .toggle-wrap { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #6b6358; cursor: pointer; }
+  .toggle-box { width: 32px; height: 18px; border-radius: 18px; background: #d8d3cc; position: relative; transition: background .2s; flex-shrink: 0; }
+  .toggle-box.on { background: #2d7a4f; }
+  .toggle-knob { width: 14px; height: 14px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: left .2s; }
+  .toggle-box.on .toggle-knob { left: 16px; }
+
+  .inner-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .inner-tab  { padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; color: #6b6358; background: #f0ece6; border: none; transition: all .15s; }
+  .inner-tab.active { background: #8b5e3c; color: #fff; }
+
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+  .section-header h2 { font-size: 18px; font-weight: 700; }
+
+  .empty { text-align: center; padding: 34px 20px; color: #a09888; }
+  .empty .ei { font-size: 34px; margin-bottom: 10px; }
+  .empty p { font-size: 14px; }
+
+  .mt-8 { margin-top: 8px; }
+
+  .chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+  @media (max-width: 700px) {
+    .content { padding: 12px; }
+    .stat-grid { grid-template-columns: repeat(2,1fr); }
+    .ctable { display: block; overflow-x: auto; }
+    .chart-grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <svg width="52" height="52" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+    <rect width="100" height="100" rx="10" fill="#3a3530"/>
+    <path d="M30 28 L36 38 L50 30 L64 38 L70 28 L70 42 L30 42 Z" fill="#c9b99a"/>
+    <circle cx="30" cy="26" r="3" fill="#c9b99a"/>
+    <circle cx="50" cy="24" r="3" fill="#c9b99a"/>
+    <circle cx="70" cy="26" r="3" fill="#c9b99a"/>
+    <path d="M22 46 L78 46 L78 72 L50 84 L22 72 Z" fill="none" stroke="#c9b99a" stroke-width="2.5"/>
+    <path d="M44 76 L44 64 C44 62 46 60 48 60 L52 60 C54 60 56 62 56 64 L56 70" fill="#c9b99a"/>
+    <ellipse cx="55" cy="60" rx="9" ry="7" fill="#c9b99a"/>
+    <ellipse cx="62" cy="64" rx="5" ry="4" fill="#c9b99a"/>
+    <path d="M50 54 L47 47 L54 52" fill="#c9b99a"/>
+    <circle cx="54" cy="59" r="1.4" fill="#3a3530"/>
+    <text x="50" y="96" font-family="Georgia,serif" font-size="7" fill="#a09888" text-anchor="middle" letter-spacing="1">ESTD · 2024</text>
+  </svg>
+  <div>
+    <div class="header-estd">Est. 2024</div>
+    <div class="header-name">The Stables At</div>
+    <div class="header-script">Hidden Springs</div>
+  </div>
+</div>
+
+<!-- ═══ STATUS BAR ═══ -->
+<div class="sync-bar">
+  <div style="display:flex;align-items:center;">
+    <span class="sync-dot green" id="syncDot"></span>
+    <span id="syncLabel">Ready</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span id="syncTime" style="color:#6b6358;"></span>
+    <button class="sync-btn" onclick="syncNow()">↻ Sync Now</button>
+    <button class="sync-btn" onclick="openApiKeyModal()" title="Set free Gemini API key for receipt scanning">🔑 AI Key</button>
+    <button class="sync-btn" onclick="exportData()">⬇ Export</button>
+    <button class="sync-btn" onclick="importData()">⬆ Import</button>
+  </div>
+</div>
+
+<!-- ═══ MONTH BAR ═══ -->
+<div class="month-bar">
+  <label>Viewing:</label>
+  <select id="monthSelect" onchange="setMonth()"></select>
+</div>
+
+<!-- ═══ TABS ═══ -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('overview',this)">📊 Overview</div>
+  <div class="tab" onclick="showTab('clients',this)">🏠 Clients &amp; Payments</div>
+  <div class="tab" onclick="showTab('expenses',this)">💰 Expenses</div>
+  <div class="tab" onclick="showTab('grain',this)">🌾 Grain</div>
+  <div class="tab" onclick="showTab('pnl',this)">📈 P&amp;L</div>
+</div>
+
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="tab-overview">
+    <div id="overviewBanner"></div>
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="card">
+      <div class="card-title">Payment Status — <span id="overviewMonthLabel"></span></div>
+      <div id="overviewList"></div>
+    </div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="section" id="tab-clients">
+    <input type="file" id="venmoCSVInput" accept=".csv,.txt" style="display:none;" onchange="handleVenmoCSV(event)">
+    <div class="section-header">
+      <h2>Clients &amp; Payments</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-secondary" onclick="document.getElementById('venmoCSVInput').click()">📥 Venmo Statement</button>
+        <button class="btn btn-primary" onclick="openAddClient()">＋ Add Client</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="ctable">
+        <thead><tr>
+          <th>Client</th><th>Horses</th><th>Board Rate ($/mo)</th>
+          <th>Venmo</th><th>Due</th><th>Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="clientBody"></tbody>
+      </table>
+      <div id="clientEmpty" class="empty" style="display:none;"><div class="ei">🏠</div><p>No clients yet.</p></div>
+    </div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div class="section" id="tab-expenses">
+    <div class="section-header">
+      <h2>Expenses</h2>
+      <button class="btn btn-primary" onclick="openAddExpense()">＋ Add Expense</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📷 Upload a Receipt</div>
+      <div class="upload-zone" id="uploadZone"
+           onclick="document.getElementById('receiptFile').click()"
+           ondragover="event.preventDefault();this.classList.add('dragover')"
+           ondrop="handleDrop(event)" ondragleave="this.classList.remove('dragover')">
+        <input type="file" id="receiptFile" accept="image/*" onchange="handleReceiptUpload(event)">
+        <div id="uploadZoneIcon" style="font-size:32px;margin-bottom:8px;">🧾</div>
+        <div id="uploadZoneText" style="font-size:14px;color:#6b6358;">Click to upload a receipt, or drag &amp; drop</div>
+        <div id="uploadZoneSub" style="font-size:12px;color:#a09888;margin-top:4px;">AI will scan and categorize your expenses automatically</div>
+        <div class="scan-setup-note" id="apiKeyNote" onclick="openApiKeyModal()" style="display:none;">⚠ Free Gemini API key needed — click to set up (takes 30 sec)</div>
+        <img class="receipt-preview" id="receiptPreview">
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="card-title" style="margin-bottom:0;">🔁 Recurring Monthly Costs</div>
+        <button class="btn btn-secondary btn-sm" onclick="openAddRecurring()">＋ Add</button>
+      </div>
+      <div id="recurringList"></div>
+      <div id="recurringTotal" style="margin-top:10px;padding-top:10px;border-top:1px solid #f0ece6;font-size:13px;color:#6b6358;"></div>
+    </div>
+    <div class="stat-grid" id="expenseSummary"></div>
+    <div id="expenseList"></div>
+  </div>
+
+  <!-- GRAIN -->
+  <div class="section" id="tab-grain">
+    <div class="section-header"><h2>Grain Tracking</h2></div>
+    <div class="inner-tabs">
+      <button class="inner-tab active" onclick="showGrainTab('schedule',this)">Feed Schedule</button>
+      <button class="inner-tab" onclick="showGrainTab('types',this)">Grain Types</button>
+      <button class="inner-tab" onclick="showGrainTab('billing',this)">Monthly Billing</button>
+      <button class="inner-tab" id="transitionTabBtn" onclick="showGrainTab('transitions',this)">🔄 Transitions</button>
+    </div>
+    <div id="grain-schedule">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <p style="font-size:13px;color:#6b6358;">Changes save automatically. Each horse can have multiple grain types.</p>
+        <button class="btn btn-secondary btn-sm" onclick="openAddGrainType()">＋ Add Grain Type</button>
+      </div>
+      <div class="grain-cards-grid" id="grainScheduleCards"></div>
+      <div id="grainDailySummary"></div>
+    </div>
+    <div id="grain-types" style="display:none;">
+      <div class="card">
+        <div class="card-title">Grain Types &amp; Pricing</div>
+        <div id="grainTypeList"></div>
+        <button class="btn btn-primary btn-sm mt-8" onclick="openAddGrainType()">＋ Add Grain Type</button>
+      </div>
+    </div>
+    <div id="grain-billing" style="display:none;">
+      <div class="card">
+        <div class="card-title">Grain Charges — <span id="grainBillingLabel"></span></div>
+        <div style="overflow-x:auto;"><table class="gtable">
+          <thead><tr><th>Client</th><th>Horse</th><th>Grain</th><th>Lbs/Day</th><th>Days</th><th>Total Lbs</th><th>Cost/Lb</th><th>Charge/Lb</th><th>Bill Amount</th></tr></thead>
+          <tbody id="grainBillingBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+    <div id="grain-transitions" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <p style="font-size:13px;color:#6b6358;">Gradually switch a horse's diet safely. Active transitions show on their grain card.</p>
+        <button class="btn btn-primary" onclick="openNewTransition()">＋ New Transition</button>
+      </div>
+      <div id="transitionList"></div>
+    </div>
+  </div>
+
+  <!-- P&L -->
+  <div class="section" id="tab-pnl">
+    <div class="section-header"><h2>Profit &amp; Loss — <span id="pnlMonthLabel"></span></h2></div>
+    <div class="stat-grid" id="pnlStats"></div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-title">6-Month Revenue &amp; Expense Trend</div>
+      <canvas id="chartTrend" height="90"></canvas>
+    </div>
+    <div class="chart-grid-2">
+      <div class="card">
+        <div class="card-title">This Month: Revenue vs Expenses</div>
+        <canvas id="chartRevExp" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Revenue Mix</div>
+        <canvas id="chartRevMix" height="200"></canvas>
+      </div>
+    </div>
+    <div class="chart-grid-2">
+      <div class="card">
+        <div class="card-title">Expense Breakdown</div>
+        <canvas id="chartExpBreakdown" height="200"></canvas>
+      </div>
+      <div class="card" id="pnlGrainCard">
+        <div class="card-title">🌾 Grain: Cost vs Revenue</div>
+        <canvas id="chartGrain" height="200"></canvas>
+        <div id="pnlGrainSummary"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- New Feed Transition Modal -->
+<div class="modal-overlay" id="modalTransition">
+  <div class="modal modal-wide">
+    <h2>🔄 Feed Transition</h2>
+
+    <div class="tr-section">
+      <div class="tr-section-title">Horse &amp; Type</div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2;">
+          <label>Horse</label>
+          <select id="tr_horse" onchange="prefillFromFeeds()"></select>
+        </div>
+        <div class="form-group">
+          <label>Transition Type</label>
+          <select id="tr_type" onchange="toggleTransitionType()">
+            <option value="gradual">🐢 Gradual (Protocol Builder)</option>
+            <option value="immediate">⚡ Immediate (new horse / known feed)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Label (optional)</label>
+        <input id="tr_label" type="text" placeholder="e.g. Switch to lower-starch diet">
+      </div>
+    </div>
+
+    <div class="tr-section" id="tr_fromSection">
+      <div class="tr-section-title">Current Feed (From)</div>
+      <p style="font-size:12px;color:#a09888;margin-bottom:8px;">Auto-filled from feed schedule. Edit if needed.</p>
+      <div id="tr_fromFeeds"></div>
+      <button class="btn btn-secondary btn-sm mt-8" onclick="addTrFeedRow('from')">＋ Add row</button>
+    </div>
+
+    <div class="tr-section">
+      <div class="tr-section-title">Target Feed (To)</div>
+      <p style="font-size:12px;color:#a09888;margin-bottom:8px;">The diet you want the horse on after the transition.</p>
+      <div id="tr_toFeeds"></div>
+      <button class="btn btn-secondary btn-sm mt-8" onclick="addTrFeedRow('to')">＋ Add row</button>
+    </div>
+
+    <div class="tr-section" id="tr_schedSection">
+      <div class="tr-section-title">Schedule &amp; Ramp</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Start Date</label>
+          <input id="tr_start" type="date">
+        </div>
+        <div class="form-group">
+          <label>Duration</label>
+          <select id="tr_duration" onchange="updatePreview()">
+            <option value="7">7 days</option>
+            <option value="14" selected>14 days</option>
+            <option value="21">21 days</option>
+            <option value="28">28 days</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </div>
+        <div class="form-group" id="tr_customDaysWrap" style="display:none;">
+          <label>Days</label>
+          <input id="tr_customDays" type="number" min="3" max="90" value="14" oninput="updatePreview()">
+        </div>
+      </div>
+      <div class="tr-section-title" style="margin-top:12px;">Ramp Style</div>
+      <div class="ramp-options" id="tr_rampOptions">
+        <div class="ramp-option selected" onclick="selectRamp('standard',this)">
+          <div class="ramp-option-name">📈 Standard</div>
+          <div class="ramp-option-desc">Smooth daily increase.<br>Good for healthy horses.</div>
+        </div>
+        <div class="ramp-option" onclick="selectRamp('conservative',this)">
+          <div class="ramp-option-name">🐢 Conservative</div>
+          <div class="ramp-option-desc">25% swap per ¼ period.<br>Most vet-recommended.</div>
+        </div>
+        <div class="ramp-option" onclick="selectRamp('cautious',this)">
+          <div class="ramp-option-name">🛡 Extra Cautious</div>
+          <div class="ramp-option-desc">10% swap per 10th.<br>For sensitive stomachs.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tr-section" id="tr_previewSection">
+      <div class="tr-section-title">Preview</div>
+      <div id="tr_preview" class="tr-preview">Fill in the feeds above to see the schedule preview.</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalTransition')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTransition()">Start Transition</button>
+    </div>
+  </div>
+</div>
+
+<!-- API Key Setup -->
+<div class="modal-overlay" id="modalApiKey">
+  <div class="modal">
+    <h2>🔑 Google Gemini API Key (Free)</h2>
+    <p style="font-size:13px;color:#6b6358;margin-bottom:12px;">Receipt scanning uses Google Gemini AI — completely free, no credit card needed. Your key is stored only in this browser.</p>
+    <div class="form-group">
+      <label>Gemini API Key</label>
+      <input id="apiKeyInput" type="password" placeholder="AIzaSy..." autocomplete="off" style="font-family:monospace;">
+    </div>
+    <p style="font-size:12px;color:#6b6358;margin-top:10px;line-height:1.6;">
+      <strong>Get your free key in 30 seconds:</strong><br>
+      1. Go to <strong>aistudio.google.com</strong><br>
+      2. Click <strong>Get API Key</strong> → <strong>Create API Key</strong><br>
+      3. Copy and paste it above — no credit card, 1,500 free scans/day
+    </p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalApiKey')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveApiKey()">Save Key</button>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt AI Review -->
+<div class="modal-overlay" id="modalReceiptReview">
+  <div class="modal modal-wide">
+    <h2>🧾 Receipt Scan — Review &amp; Confirm</h2>
+    <img id="reviewReceiptImg" class="receipt-review-img">
+    <div id="reviewContent"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalReceiptReview')">Cancel</button>
+      <button class="btn btn-primary" id="btnConfirmReceipt" onclick="confirmReceiptItems()">＋ Add Expenses</button>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Full Image Viewer -->
+<div class="modal-overlay" id="modalReceiptImg">
+  <div class="modal modal-wide" style="background:transparent;box-shadow:none;padding:8px;">
+    <img id="receiptImgFull" class="exp-thumb-full" onclick="closeModal('modalReceiptImg')" title="Click to close">
+  </div>
+</div>
+
+<!-- Venmo Import -->
+<div class="modal-overlay" id="modalVenmoImport">
+  <div class="modal" style="width:720px;">
+    <h2>📥 Import Venmo Statement</h2>
+    <p style="font-size:13px;color:#6b6358;margin-bottom:16px;">Incoming payments are matched to your clients. Check the ones you want to mark as paid, adjust any mismatches, then click Apply.</p>
+    <div id="venmoImportContent"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalVenmoImport')">Cancel</button>
+      <button class="btn btn-primary" id="btnApplyVenmo" onclick="applyVenmoImport()" style="display:none;">✓ Apply Selected Payments</button>
+    </div>
+  </div>
+</div>
+
+<!-- Client -->
+<div class="modal-overlay" id="modalClient">
+  <div class="modal">
+    <h2 id="clientModalTitle">Add Client</h2>
+    <input type="hidden" id="cf_id">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;"><label>Client Name *</label><input id="cf_name" type="text" placeholder="Jane Smith"></div>
+      <div class="form-group"><label>Venmo (no @)</label><input id="cf_venmo" type="text" placeholder="janevenmo"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Payment Due</label><select id="cf_dueDay"><option value="1">1st of month</option><option value="15">15th of month</option></select></div>
+      <div class="form-group"><label>Phone / Email</label><input id="cf_contact" type="text" placeholder="optional"></div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:700;color:#6b6358;text-transform:uppercase;letter-spacing:.5px;">Horses</div>
+      <button class="btn btn-secondary btn-sm" onclick="addHorseRow()">＋ Add Horse</button>
+    </div>
+    <div id="horseRows"></div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="btnDeleteClient" onclick="deleteClient()" style="margin-right:auto;display:none;">Delete Client</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalClient')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveClient()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense -->
+<div class="modal-overlay" id="modalExpense">
+  <div class="modal">
+    <h2>Add Expense</h2>
+    <img id="expenseReceiptThumb" style="max-width:100%;max-height:140px;border-radius:8px;margin-bottom:12px;display:none;">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;"><label>Vendor / Description *</label><input id="ex_vendor" type="text" placeholder="Tractor Supply Co."></div>
+      <div class="form-group"><label>Amount ($) *</label><input id="ex_amount" type="number" step="0.01" placeholder="0.00" min="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date *</label><input id="ex_date" type="date"></div>
+      <div class="form-group"><label>Category</label>
+        <select id="ex_cat">
+          <option value="feed">🌾 Feed / Grain</option><option value="bedding">🛏 Bedding</option>
+          <option value="vet">🩺 Veterinary</option><option value="farrier">🔨 Farrier</option>
+          <option value="supplies">🧰 Supplies</option><option value="equipment">⚙️ Equipment</option>
+          <option value="utilities">💡 Utilities</option><option value="other">📦 Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row"><div class="form-group"><label>Notes</label><textarea id="ex_notes" rows="2" style="resize:vertical;"></textarea></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalExpense')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveExpense()">Add Expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- Recurring Expense modal -->
+<div class="modal-overlay" id="modalRecurring">
+  <div class="modal">
+    <h2 id="recurringModalTitle">Add Recurring Expense</h2>
+    <input type="hidden" id="re_id">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;"><label>Name *</label><input id="re_name" type="text" placeholder="Hay, Mike, Electric…"></div>
+      <div class="form-group"><label>Category</label>
+        <select id="re_cat">
+          <option value="feed">🌾 Feed / Hay</option><option value="bedding">🛏 Bedding</option>
+          <option value="vet">🩺 Veterinary</option><option value="farrier">🔨 Farrier</option>
+          <option value="supplies">🧰 Supplies</option><option value="equipment">⚙️ Equipment</option>
+          <option value="utilities">💡 Utilities</option><option value="other">📦 Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Billing Type</label>
+        <select id="re_type" onchange="toggleRecurringType()">
+          <option value="monthly">Fixed per month</option>
+          <option value="daily">Per day × days in month</option>
+        </select>
+      </div>
+      <div class="form-group" id="re_monthly_wrap">
+        <label>Monthly Amount ($)</label>
+        <input id="re_monthly" type="number" step="0.01" placeholder="0.00" min="0">
+      </div>
+      <div class="form-group" id="re_daily_wrap" style="display:none;">
+        <label>Daily Cost ($)</label>
+        <input id="re_daily" type="number" step="0.01" placeholder="0.00" min="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Notes (optional)</label><input id="re_notes" type="text" placeholder="e.g. ~3.5 bales/day @ $6"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="btnDeleteRecurring" onclick="deleteRecurring()" style="margin-right:auto;display:none;">Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalRecurring')">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveRecurring" onclick="saveRecurring()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Grain Type -->
+<div class="modal-overlay" id="modalGrainType">
+  <div class="modal">
+    <h2 id="grainTypeModalTitle">Add Grain Type</h2>
+    <input type="hidden" id="gt_id">
+    <div class="form-row"><div class="form-group" style="flex:2;"><label>Grain Name *</label><input id="gt_name" type="text" placeholder="Purina Senior, Alfalfa Pellets…"></div></div>
+    <div class="form-row">
+      <div class="form-group"><label>Your Cost per Lb ($)</label><input id="gt_cost" type="number" step="0.001" placeholder="0.250" min="0"></div>
+      <div class="form-group"><label>Charge to Client per Lb ($)</label><input id="gt_charge" type="number" step="0.001" placeholder="0.300" min="0"></div>
+    </div>
+    <p style="font-size:12px;color:#a09888;margin-top:-4px;">Leave blank to track without billing.</p>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="btnDeleteGrain" onclick="deleteGrainTypeFromModal()" style="margin-right:auto;display:none;">Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('modalGrainType')">Cancel</button>
+      <button class="btn btn-primary" id="btnSaveGrain" onclick="saveGrainType()">Add Grain Type</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<script>
+// ════════════════════════════════════════════
+//  DATA — Firebase REST sync (cross-browser)
+//  Falls back to localStorage when offline
+// ════════════════════════════════════════════
+const LS_DATA_KEY = 'barnDataBackup';
+const FIREBASE_URL = 'https://hidden-springs-barn-default-rtdb.firebaseio.com';
+let syncInterval = null;
+let lastSyncTime = null;
+let isSyncing = false;
+
+const SEED_CLIENTS = [
+  { name:'Naomi',        horses:[{name:'Bow',location:'stall',rate:600},{name:'Shadow',location:'pasture',rate:0},{name:'Patty',location:'stall',rate:600}]},
+  { name:'Jessica Johns',horses:[{name:'Prada',location:'stall',rate:600},{name:'Flirt',location:'stall',rate:600}]},
+  { name:'Marlene',      horses:[{name:'Gunny',location:'pasture',rate:0}]},
+  { name:'Ashley',       horses:[{name:'Cat',location:'pasture',rate:0}]},
+  { name:'Deb',          horses:[{name:'Beauty',location:'stall',rate:600},{name:'Ellie',location:'stall',rate:600}]},
+  { name:'Anne',         horses:[{name:'Kai',location:'stall',rate:600}]},
+  { name:'Emily',        horses:[{name:'Jet',location:'stall',rate:600}]},
+  { name:'Tanya',        horses:[{name:'Dream',location:'pasture',rate:0}]},
+  { name:'Laura',        horses:[{name:'Lele',location:'stall',rate:600}]},
+  { name:'Jessica Rosen',horses:[{name:'Mandrid',location:'stall',rate:600}]},
+  { name:'Erica',        horses:[{name:'Chichi',location:'pasture',rate:0}]},
+  { name:'Brooke',       horses:[{name:'Odin',location:'stall',rate:600}]},
+  { name:'Shelby',       horses:[{name:'Tre',location:'stall',rate:600}]},
+  { name:'Sue',          horses:[{name:'Ravi',location:'stall',rate:600}]},
+];
+
+let db = {clients:[],payments:{},expenses:[],grainTypes:[],grainSchedule:{},recurringExpenses:[]};
+
+function uid() { return '_'+Math.random().toString(36).slice(2,9)+Date.now().toString(36); }
+
+function buildSeed() {
+  db.clients = SEED_CLIENTS.map(c=>({
+    id:uid(), name:c.name, venmo:'', contact:'', dueDay:1,
+    horses:c.horses.map(h=>({id:uid(), name:h.name, location:h.location, stallNum:'', rate:h.rate}))
+  }));
+  db.grainTypes = [{id:uid(), name:'Alfalfa', costPerLb:0, chargePerLb:0}];
+  db.recurringExpenses = [
+    {id:uid(), name:'Hay',      category:'feed',    type:'daily',   dailyCost:21,   monthlyAmount:0,    notes:'~3.5 bales/day @ $6/bale', active:true},
+    {id:uid(), name:'Shavings', category:'bedding', type:'monthly', dailyCost:0,    monthlyAmount:569,  notes:'100 bags @ $5.69',         active:true},
+    {id:uid(), name:'Mike',     category:'other',   type:'monthly', dailyCost:0,    monthlyAmount:1400, notes:'',                         active:true},
+  ];
+}
+
+function ensureArrays(data) {
+  return {
+    clients:           Array.isArray(data.clients)           ? data.clients           : [],
+    payments:          data.payments           || {},
+    expenses:          Array.isArray(data.expenses)          ? data.expenses          : [],
+    grainTypes:        Array.isArray(data.grainTypes)        ? data.grainTypes        : [],
+    grainSchedule:     data.grainSchedule      || {},
+    recurringExpenses: Array.isArray(data.recurringExpenses) ? data.recurringExpenses : [],
+    transitions:       Array.isArray(data.transitions)       ? data.transitions       : [],
+  };
+}
+
+// ── Sync status display ──
+function setSyncStatus(state, msg) {
+  const dot   = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  dot.className = 'sync-dot ' + (state==='ok'?'green':state==='busy'?'yellow':'red');
+  label.textContent = msg;
+}
+function setSyncTime() {
+  lastSyncTime = new Date();
+  const t = lastSyncTime.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('syncTime').textContent = 'Last sync: '+t;
+}
+
+// ── Firebase REST ──
+async function cloudGet() {
+  const res = await fetch(FIREBASE_URL + '/barnData.json');
+  if (!res.ok) throw new Error('GET failed: '+res.status);
+  return await res.json();
+}
+async function cloudSet(data) {
+  const res = await fetch(FIREBASE_URL + '/barnData.json', {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('PUT failed: '+res.status);
+}
+
+async function syncNow() {
+  if (isSyncing) return;
+  isSyncing = true;
+  setSyncStatus('busy', 'Syncing…');
+  try {
+    const remote = await cloudGet();
+    if (remote) {
+      db = ensureArrays(remote);
+    }
+    if (!remote) {
+      if (!db.clients.length) buildSeed();
+      await cloudSet(db);
+    }
+    localStorage.setItem(LS_DATA_KEY, JSON.stringify(db));
+    setSyncStatus('ok', '🟢 Synced');
+    setSyncTime();
+    renderAll();
+  } catch(e) {
+    setSyncStatus('red', '⚠ Offline — changes saved locally');
+  }
+  isSyncing = false;
+}
+
+async function saveDB() {
+  // Optimistic local save first (instant)
+  localStorage.setItem(LS_DATA_KEY, JSON.stringify(db));
+  setSyncStatus('busy', 'Saving…');
+  try {
+    await cloudSet(db);
+    setSyncStatus('ok', '🟢 Saved');
+    setSyncTime();
+  } catch(e) {
+    setSyncStatus('red', '⚠ Saved locally — check connection');
+  }
+}
+
+function startSync() {
+  syncNow();
+  if (syncInterval) clearInterval(syncInterval);
+  syncInterval = setInterval(syncNow, 30000);
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'hidden-springs-backup.json'; a.click();
+}
+
+function importData() {
+  const input = document.createElement('input'); input.type='file'; input.accept='.json';
+  input.onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (!parsed.clients) throw new Error('Invalid');
+        db = ensureArrays(parsed);
+        saveDB(); renderAll();
+        alert('Data imported successfully!');
+      } catch { alert('Could not read file. Make sure it\'s a valid backup.'); }
+    };
+    r.readAsText(f);
+  };
+  input.click();
+}
+
+function init() {
+  // Load cached data immediately for a fast first paint
+  const cached = localStorage.getItem(LS_DATA_KEY);
+  if (cached) {
+    try { db = ensureArrays(JSON.parse(cached)); } catch(e) {}
+    renderAll();
+  }
+  startSync();
+}
+
+// ════════════════════════════════
+//  MONTH
+// ════════════════════════════════
+let curY, curM;
+const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function initMonth() {
+  const now=new Date(); curY=now.getFullYear(); curM=now.getMonth()+1;
+  const sel=document.getElementById('monthSelect');
+  for(let i=-6;i<=3;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()+i,1);
+    const o=document.createElement('option');
+    o.value=`${d.getFullYear()}_${d.getMonth()+1}`;
+    o.textContent=`${MN[d.getMonth()]} ${d.getFullYear()}`;
+    if(i===0) o.selected=true;
+    sel.appendChild(o);
+  }
+}
+function setMonth(){const v=document.getElementById('monthSelect').value.split('_'); curY=+v[0]; curM=+v[1]; renderAll();}
+function mLabel(){return `${MN[curM-1]} ${curY}`;}
+function daysIn(y,m){return new Date(y,m,0).getDate();}
+
+// ════════════════════════════════
+//  TABS
+// ════════════════════════════════
+function showTab(name,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active'); el.classList.add('active');
+  renderAll();
+}
+function showGrainTab(name,el){
+  ['schedule','types','billing','transitions'].forEach(n=>document.getElementById('grain-'+n).style.display=n===name?'block':'none');
+  document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
+  if(name==='schedule')renderGrainSchedule();
+  if(name==='types')renderGrainTypes();
+  if(name==='billing')renderGrainBilling();
+  if(name==='transitions')renderTransitions();
+}
+
+// ════════════════════════════════
+//  PAYMENTS
+// ════════════════════════════════
+function clientTotal(c){return(c.horses||[]).reduce((s,h)=>s+(parseFloat(h.rate)||0),0);}
+function pKey(cid){return`${cid}_${curY}_${curM}`;}
+function getStatus(c){
+  const p=db.payments[pKey(c.id)];
+  if(p&&p.paid) return 'paid';
+  const now=new Date(), grace=new Date(curY,curM-1,(c.dueDay||1)+5);
+  if(!p&&now>grace&&(curY<now.getFullYear()||(curY===now.getFullYear()&&curM<=now.getMonth()+1))) return 'overdue';
+  return 'unpaid';
+}
+function togglePay(cid){
+  const k=pKey(cid), cur=db.payments[k];
+  db.payments[k]=(cur&&cur.paid)?{paid:false,paidDate:null}:{paid:true,paidDate:new Date().toISOString().split('T')[0]};
+  saveDB(); renderAll();
+}
+function venmoHref(c){
+  if(!c.venmo) return null;
+  const t=clientTotal(c);
+  return`venmo://paycharge?txn=request&recipients=${c.venmo}&amount=${t.toFixed(2)}&note=${encodeURIComponent('Horse board - '+mLabel())}`;
+}
+
+// ════════════════════════════════
+//  OVERVIEW
+// ════════════════════════════════
+function renderOverview(){
+  document.getElementById('overviewMonthLabel').textContent=mLabel();
+  let paid=0,unpaid=0,overdue=0,expected=0,received=0,od=[];
+  db.clients.forEach(c=>{const t=clientTotal(c),s=getStatus(c); expected+=t; if(s==='paid'){paid++;received+=t;}else if(s==='overdue'){overdue++;od.push(c.name);}else unpaid++;});
+  const mExp=db.expenses.filter(e=>{if(!e.date)return false; const d=new Date(e.date+'T12:00:00'); return d.getFullYear()===curY&&d.getMonth()+1===curM;});
+  const totalExp=mExp.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  const net=received-totalExp;
+  document.getElementById('overviewBanner').innerHTML=od.length?`<div class="alert-banner warning">⚠️ <strong>${od.length} past due:</strong> ${od.join(', ')}</div>`:'';
+  document.getElementById('statGrid').innerHTML=`
+    <div class="stat-card green"><div class="stat-label">Paid</div><div class="stat-value">${paid}</div><div class="stat-sub">$${received.toLocaleString()} received</div></div>
+    <div class="stat-card${unpaid>0?' amber':''}"><div class="stat-label">Unpaid</div><div class="stat-value">${unpaid}</div><div class="stat-sub">awaiting</div></div>
+    <div class="stat-card${overdue>0?' red':''}"><div class="stat-label">Past Due</div><div class="stat-value">${overdue}</div><div class="stat-sub">&gt;5-day grace</div></div>
+    <div class="stat-card"><div class="stat-label">Expected Revenue</div><div class="stat-value" style="font-size:22px;">$${expected.toLocaleString()}</div><div class="stat-sub">${mLabel()}</div></div>
+    <div class="stat-card${net>=0?' green':' red'}"><div class="stat-label">Net</div><div class="stat-value" style="font-size:22px;">${net>=0?'+':''}$${Math.abs(net).toLocaleString()}</div><div class="stat-sub">$${totalExp.toFixed(0)} expenses</div></div>`;
+  const el=document.getElementById('overviewList');
+  if(!db.clients.length){el.innerHTML='<div class="empty"><div class="ei">🐴</div><p>No clients yet.</p></div>';return;}
+  el.innerHTML=db.clients.map(c=>{
+    const s=getStatus(c),p=db.payments[pKey(c.id)],t=clientTotal(c);
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 2px;border-bottom:1px solid #f0ece6;flex-wrap:wrap;gap:8px;">
+      <div><span style="font-weight:600;">${esc(c.name)}</span><span style="color:#a09888;font-size:13px;margin-left:8px;">${(c.horses||[]).map(h=>h.name).join(', ')}</span></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        ${t>0?`<span style="font-size:13px;font-weight:700;">$${t.toLocaleString()}/mo</span>`:''}
+        ${p&&p.paidDate?`<span style="font-size:12px;color:#a09888;">paid ${p.paidDate}</span>`:`<span style="font-size:12px;color:#a09888;">due ${c.dueDay===15||c.dueDay==='15'?'15th':'1st'}</span>`}
+        <span class="badge ${s}">${s==='paid'?'✓ Paid':s==='overdue'?'⚠ Past Due':'· Unpaid'}</span>
+      </div></div>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+//  CLIENTS TABLE
+// ════════════════════════════════
+function renderClients(){
+  const tbody=document.getElementById('clientBody'), empty=document.getElementById('clientEmpty');
+  if(!db.clients.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=db.clients.map(c=>{
+    const s=getStatus(c),isPaid=s==='paid',t=clientTotal(c),vLink=venmoHref(c);
+    const chips=(c.horses||[]).map(h=>`<span class="hchip ${h.location}">${h.location==='pasture'?'🌿':'🏠'} ${esc(h.name)}</span>`).join('');
+    const rateRows=(c.horses||[]).map(h=>`
+      <div class="rate-row">
+        <span class="rate-horse-name" title="${esc(h.name)}">${esc(h.name)}</span>
+        <span style="font-size:12px;color:#a09888;">$</span>
+        <input class="rate-input${h.location==='pasture'?' pasture-rate':''}" type="number" min="0" step="5"
+               value="${h.rate||''}" placeholder="0"
+               onchange="saveRate('${c.id}','${h.id}',this)"
+               onblur="saveRate('${c.id}','${h.id}',this)">
+      </div>`).join('');
+    const venmoCell=`<div id="vCell_${c.id}">
+      <div id="vDisplay_${c.id}" ${c.venmo?'':'style="display:none"'}>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span class="venmo-display" onclick="openVenmoEdit('${c.id}')">@${esc(c.venmo||'')}</span>
+          ${vLink?`<a href="${vLink}" class="btn btn-venmo btn-sm">💙 Request</a>`:''}
+        </div>
+      </div>
+      <span id="vUnset_${c.id}" class="venmo-unset" ${c.venmo?'style="display:none"':''} onclick="openVenmoEdit('${c.id}')">＋ Add Venmo @</span>
+      <div class="venmo-edit-wrap" id="vEdit_${c.id}">
+        <span style="font-size:13px;color:#008CFF;font-weight:600;">@</span>
+        <input class="venmo-input" id="vInput_${c.id}" type="text" placeholder="username" value="${esc(c.venmo||'')}"
+               onkeydown="if(event.key==='Enter')saveVenmo('${c.id}');if(event.key==='Escape')closeVenmoEdit('${c.id}')">
+        <button class="btn btn-primary btn-sm" onclick="saveVenmo('${c.id}')">Save</button>
+        <button class="btn btn-secondary btn-sm" onclick="closeVenmoEdit('${c.id}')">✕</button>
+      </div></div>`;
+    return`<tr class="${s==='overdue'?'row-overdue':''}">
+      <td><div style="font-weight:600;">${esc(c.name)}</div>${c.contact?`<div style="font-size:12px;color:#a09888;">${esc(c.contact)}</div>`:''}<div style="margin-top:4px;font-size:11px;color:#b8b0a6;">${c.dueDay===15||c.dueDay==='15'?'Due 15th':'Due 1st'}</div></td>
+      <td><div class="horse-chips">${chips}</div></td>
+      <td>${rateRows}${t>0?`<div style="margin-top:6px;font-size:12px;color:#6b6358;border-top:1px solid #f0ece6;padding-top:5px;">Total: <strong>$${t.toLocaleString()}/mo</strong></div>`:''}</td>
+      <td>${venmoCell}</td>
+      <td style="font-size:13px;">${c.dueDay===15||c.dueDay==='15'?'15th':'1st'}</td>
+      <td><span class="badge ${s}">${s==='paid'?'✓ Paid':s==='overdue'?'⚠ Past Due':'· Unpaid'}</span></td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-pay${isPaid?' is-paid':''}" onclick="togglePay('${c.id}')">${isPaid?'↩ Unmark':'✓ Mark Paid'}</button>
+        <button class="btn btn-icon" onclick="openEditClient('${c.id}')">✏️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function saveRate(cid,hid,input){
+  const c=db.clients.find(x=>x.id===cid); if(!c)return;
+  const h=c.horses.find(x=>x.id===hid); if(!h)return;
+  h.rate=parseFloat(input.value)||0;
+  saveDB();
+  input.classList.remove('rate-saved-flash'); void input.offsetWidth; input.classList.add('rate-saved-flash');
+  renderOverview();
+}
+function openVenmoEdit(cid){
+  document.getElementById('vDisplay_'+cid).style.display='none';
+  document.getElementById('vUnset_'+cid).style.display='none';
+  document.getElementById('vEdit_'+cid).classList.add('open');
+  setTimeout(()=>document.getElementById('vInput_'+cid)?.focus(),50);
+}
+function closeVenmoEdit(cid){
+  const c=db.clients.find(x=>x.id===cid); if(!c)return;
+  document.getElementById('vEdit_'+cid).classList.remove('open');
+  if(c.venmo){document.getElementById('vDisplay_'+cid).style.display='block';document.getElementById('vUnset_'+cid).style.display='none';}
+  else{document.getElementById('vDisplay_'+cid).style.display='none';document.getElementById('vUnset_'+cid).style.display='inline-block';}
+}
+function saveVenmo(cid){
+  const c=db.clients.find(x=>x.id===cid); if(!c)return;
+  c.venmo=document.getElementById('vInput_'+cid).value.trim().replace(/^@/,'');
+  saveDB(); renderClients();
+}
+
+// ── Client modal ──
+let hrCount=0;
+function openAddClient(){
+  document.getElementById('clientModalTitle').textContent='Add Client';
+  document.getElementById('cf_id').value='';
+  ['cf_name','cf_venmo','cf_contact'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cf_dueDay').value='1';
+  document.getElementById('btnDeleteClient').style.display='none';
+  document.getElementById('horseRows').innerHTML=''; hrCount=0; addHorseRow();
+  openModal('modalClient');
+}
+function openEditClient(id){
+  const c=db.clients.find(x=>x.id===id); if(!c)return;
+  document.getElementById('clientModalTitle').textContent='Edit Client';
+  document.getElementById('cf_id').value=c.id;
+  document.getElementById('cf_name').value=c.name;
+  document.getElementById('cf_venmo').value=c.venmo||'';
+  document.getElementById('cf_contact').value=c.contact||'';
+  document.getElementById('cf_dueDay').value=c.dueDay||1;
+  document.getElementById('btnDeleteClient').style.display='inline-flex';
+  document.getElementById('horseRows').innerHTML=''; hrCount=0;
+  (c.horses||[]).forEach(h=>addHorseRow(h));
+  if(!(c.horses||[]).length) addHorseRow();
+  openModal('modalClient');
+}
+function addHorseRow(h){
+  const i=hrCount++;
+  const d=document.createElement('div');
+  d.className='horse-row'; d.id='hr_'+i;
+  d.innerHTML=`
+    <div class="form-group" style="flex:2;min-width:95px;"><label>Horse Name *</label><input type="text" id="hn_${i}" value="${esc(h?.name||'')}" placeholder="Blaze"></div>
+    <div class="form-group" style="min-width:90px;"><label>Location</label><select id="hl_${i}"><option value="stall" ${(!h||h.location==='stall')?'selected':''}>🏠 Stall</option><option value="pasture" ${h?.location==='pasture'?'selected':''}>🌿 Pasture</option></select></div>
+    <div class="form-group" style="min-width:60px;"><label>Stall #</label><input type="text" id="hs_${i}" value="${esc(h?.stallNum||'')}" placeholder="—" style="max-width:60px;"></div>
+    <div class="form-group" style="min-width:85px;"><label>Rate ($/mo)</label><input type="number" id="hr_${i}" value="${h?.rate||''}" placeholder="0" min="0" style="max-width:85px;"></div>
+    <input type="hidden" id="hid_${i}" value="${h?.id||''}">`;
+  const btn=document.createElement('button');
+  btn.className='btn btn-danger btn-sm'; btn.textContent='✕'; btn.style.alignSelf='flex-end';
+  btn.onclick=()=>d.remove();
+  d.appendChild(btn);
+  document.getElementById('horseRows').appendChild(d);
+}
+function collectHorses(){
+  const rows=document.querySelectorAll('#horseRows .horse-row'), horses=[];
+  rows.forEach(row=>{
+    const i=row.id.replace('hr_','');
+    const name=document.getElementById('hn_'+i)?.value.trim(); if(!name)return;
+    horses.push({id:document.getElementById('hid_'+i)?.value||uid(),name,location:document.getElementById('hl_'+i)?.value||'stall',stallNum:document.getElementById('hs_'+i)?.value.trim()||'',rate:parseFloat(document.getElementById('hr_'+i)?.value)||0});
+  });
+  return horses;
+}
+function saveClient(){
+  const id=document.getElementById('cf_id').value, name=document.getElementById('cf_name').value.trim();
+  if(!name){alert('Please enter a client name.');return;}
+  const horses=collectHorses(); if(!horses.length){alert('Add at least one horse.');return;}
+  const data={name,venmo:document.getElementById('cf_venmo').value.trim().replace('@',''),contact:document.getElementById('cf_contact').value.trim(),dueDay:parseInt(document.getElementById('cf_dueDay').value),horses};
+  if(id){const idx=db.clients.findIndex(x=>x.id===id); if(idx>-1)db.clients[idx]={...db.clients[idx],...data};}
+  else db.clients.push({id:uid(),...data});
+  saveDB(); closeModal('modalClient'); renderAll();
+}
+function deleteClient(){
+  const id=document.getElementById('cf_id').value;
+  if(!confirm('Delete this client and all their records?'))return;
+  const c=db.clients.find(x=>x.id===id);
+  const hIds=new Set((c?.horses||[]).map(h=>h.id));
+  db.clients=db.clients.filter(x=>x.id!==id);
+  Object.keys(db.payments).forEach(k=>{if(k.startsWith(id+'_'))delete db.payments[k];});
+  Object.keys(db.grainSchedule).forEach(k=>{if(hIds.has(k.split('_')[0]))delete db.grainSchedule[k];});
+  saveDB(); closeModal('modalClient'); renderAll();
+}
+
+// ════════════════════════════════
+//  EXPENSES
+// ════════════════════════════════
+const CE={feed:'🌾',bedding:'🛏',vet:'🩺',farrier:'🔨',supplies:'🧰',equipment:'⚙️',utilities:'💡',other:'📦'};
+const CL={feed:'Feed / Grain',bedding:'Bedding',vet:'Veterinary',farrier:'Farrier',supplies:'Supplies',equipment:'Equipment',utilities:'Utilities',other:'Other'};
+
+function recurringMonthlyAmount(r) {
+  if (!r.active) return 0;
+  if (r.type === 'daily') return (parseFloat(r.dailyCost)||0) * daysIn(curY, curM);
+  return parseFloat(r.monthlyAmount)||0;
+}
+
+function renderRecurring() {
+  const list  = document.getElementById('recurringList');
+  const total = document.getElementById('recurringTotal');
+  const items = db.recurringExpenses || [];
+  if (!items.length) { list.innerHTML='<p style="font-size:13px;color:#a09888;">No recurring expenses yet. Click ＋ Add to set one up.</p>'; total.innerHTML=''; return; }
+  let grand = 0;
+  list.innerHTML = items.map(r => {
+    const amt = recurringMonthlyAmount(r);
+    grand += amt;
+    return `<div class="recurring-row ${r.active?'':'recurring-inactive'}">
+      <div>
+        <div class="recurring-name">${CE[r.category]||'📦'} ${esc(r.name)}</div>
+        ${r.notes?`<div class="recurring-notes">${esc(r.notes)}</div>`:''}
+        ${r.type==='daily'?`<div class="recurring-notes">$${parseFloat(r.dailyCost||0).toFixed(2)}/day × ${daysIn(curY,curM)} days</div>`:''}
+      </div>
+      <div class="recurring-right">
+        <div class="recurring-amt">${r.active?`−$${amt.toFixed(2)}`:'paused'}</div>
+        <label class="toggle-wrap" onclick="toggleRecurringActive('${r.id}')">
+          <div class="toggle-box ${r.active?'on':''}"><div class="toggle-knob"></div></div>
+        </label>
+        <button class="btn btn-icon btn-sm" onclick="openEditRecurring('${r.id}')">✏️</button>
+      </div>
+    </div>`;
+  }).join('');
+  total.innerHTML = `<strong>Total recurring this month: $${grand.toFixed(2)}</strong>`;
+}
+
+function renderExpenses(){
+  renderRecurring();
+  const mExp=db.expenses.filter(e=>{if(!e.date)return false;const d=new Date(e.date+'T12:00:00');return d.getFullYear()===curY&&d.getMonth()+1===curM;}).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const oneTime=mExp.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  const recurring=(db.recurringExpenses||[]).reduce((s,r)=>s+recurringMonthlyAmount(r),0);
+  const total=oneTime+recurring;
+  const cats={};
+  mExp.forEach(e=>{cats[e.category]=(cats[e.category]||0)+(parseFloat(e.amount)||0);});
+  document.getElementById('expenseSummary').innerHTML=
+    `<div class="stat-card"><div class="stat-label">One-Time Expenses</div><div class="stat-value" style="color:#c0392b;font-size:22px;">$${oneTime.toFixed(2)}</div><div class="stat-sub">${mExp.length} transactions</div></div>`+
+    `<div class="stat-card"><div class="stat-label">Recurring Costs</div><div class="stat-value" style="color:#c0392b;font-size:22px;">$${recurring.toFixed(2)}</div><div class="stat-sub">this month</div></div>`+
+    `<div class="stat-card red"><div class="stat-label">Total Expenses</div><div class="stat-value" style="font-size:22px;">$${total.toFixed(2)}</div><div class="stat-sub">${mLabel()}</div></div>`+
+    Object.entries(cats).map(([c,a])=>`<div class="stat-card"><div class="stat-label">${CE[c]||'📦'} ${CL[c]||c}</div><div class="stat-value" style="font-size:18px;">$${a.toFixed(2)}</div></div>`).join('');
+  const el=document.getElementById('expenseList');
+  if(!mExp.length){el.innerHTML=`<div class="empty"><div class="ei">💰</div><p>No one-time expenses for ${mLabel()}.</p></div>`;return;}
+  el.innerHTML=mExp.map(e=>`<div class="expense-item">
+    ${e.receiptThumb?`<img class="exp-thumb" src="${e.receiptThumb}" onclick="viewReceiptThumb('${e.receiptThumb}')" title="View receipt">`:`<div class="exp-icon">${CE[e.category]||'📦'}</div>`}
+    <div class="exp-info"><div class="exp-vendor">${esc(e.vendor)}</div><div class="exp-meta">${e.date} · ${CL[e.category]||e.category}${e.notes?' · '+esc(e.notes):''}</div></div>
+    <div class="exp-amount">−$${parseFloat(e.amount).toFixed(2)}</div>
+    <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">✕</button>
+  </div>`).join('');
+}
+
+// ── Recurring management ──
+function toggleRecurringActive(id) {
+  const r = (db.recurringExpenses||[]).find(x=>x.id===id); if (!r) return;
+  r.active = !r.active;
+  saveDB(); renderExpenses();
+}
+function openAddRecurring() {
+  document.getElementById('recurringModalTitle').textContent = 'Add Recurring Expense';
+  document.getElementById('btnSaveRecurring').textContent = 'Add';
+  document.getElementById('btnDeleteRecurring').style.display = 'none';
+  document.getElementById('re_id').value = '';
+  ['re_name','re_notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('re_monthly').value='';
+  document.getElementById('re_daily').value='';
+  document.getElementById('re_cat').value='feed';
+  document.getElementById('re_type').value='monthly';
+  toggleRecurringType();
+  openModal('modalRecurring');
+}
+function openEditRecurring(id) {
+  const r = (db.recurringExpenses||[]).find(x=>x.id===id); if (!r) return;
+  document.getElementById('recurringModalTitle').textContent = 'Edit Recurring Expense';
+  document.getElementById('btnSaveRecurring').textContent = 'Save Changes';
+  document.getElementById('btnDeleteRecurring').style.display = 'inline-flex';
+  document.getElementById('re_id').value = r.id;
+  document.getElementById('re_name').value = r.name;
+  document.getElementById('re_cat').value = r.category||'other';
+  document.getElementById('re_type').value = r.type||'monthly';
+  document.getElementById('re_monthly').value = r.monthlyAmount||'';
+  document.getElementById('re_daily').value = r.dailyCost||'';
+  document.getElementById('re_notes').value = r.notes||'';
+  toggleRecurringType();
+  openModal('modalRecurring');
+}
+function toggleRecurringType() {
+  const t = document.getElementById('re_type').value;
+  document.getElementById('re_monthly_wrap').style.display = t==='monthly'?'flex':'none';
+  document.getElementById('re_daily_wrap').style.display   = t==='daily'  ?'flex':'none';
+}
+function saveRecurring() {
+  const name = document.getElementById('re_name').value.trim();
+  if (!name) { alert('Enter a name.'); return; }
+  const id = document.getElementById('re_id').value;
+  const type = document.getElementById('re_type').value;
+  const data = {
+    name, category: document.getElementById('re_cat').value,
+    type, active: true,
+    monthlyAmount: parseFloat(document.getElementById('re_monthly').value)||0,
+    dailyCost:     parseFloat(document.getElementById('re_daily').value)||0,
+    notes: document.getElementById('re_notes').value.trim(),
+  };
+  if (!db.recurringExpenses) db.recurringExpenses=[];
+  if (id) {
+    const idx=db.recurringExpenses.findIndex(x=>x.id===id);
+    if (idx>-1) db.recurringExpenses[idx]={...db.recurringExpenses[idx],...data};
+  } else {
+    db.recurringExpenses.push({id:uid(),...data});
+  }
+  saveDB(); closeModal('modalRecurring'); renderExpenses();
+}
+function deleteRecurring() {
+  const id=document.getElementById('re_id').value; if(!id)return;
+  if(!confirm('Delete this recurring expense?'))return;
+  db.recurringExpenses=(db.recurringExpenses||[]).filter(x=>x.id!==id);
+  saveDB(); closeModal('modalRecurring'); renderExpenses();
+}
+
+let currentReceiptDataUrl = null;
+function openAddExpense(pf){
+  document.getElementById('ex_vendor').value=pf?.vendor||'';
+  document.getElementById('ex_amount').value=pf?.amount||'';
+  document.getElementById('ex_date').value=pf?.date||new Date().toISOString().split('T')[0];
+  document.getElementById('ex_cat').value=pf?.category||'feed';
+  document.getElementById('ex_notes').value=pf?.notes||'';
+  const thumb=document.getElementById('expenseReceiptThumb');
+  if(currentReceiptDataUrl){thumb.src=currentReceiptDataUrl;thumb.style.display='block';}
+  else thumb.style.display='none';
+  openModal('modalExpense');
+}
+function saveExpense(){
+  const vendor=document.getElementById('ex_vendor').value.trim(), amount=document.getElementById('ex_amount').value, date=document.getElementById('ex_date').value;
+  if(!vendor||!amount||!date){alert('Fill in Vendor, Amount, and Date.');return;}
+  db.expenses.push({id:uid(),vendor,amount:parseFloat(amount),date,category:document.getElementById('ex_cat').value,notes:document.getElementById('ex_notes').value.trim()});
+  currentReceiptDataUrl=null;
+  saveDB(); closeModal('modalExpense'); renderAll();
+}
+function deleteExpense(id){
+  if(!confirm('Delete this expense?'))return;
+  db.expenses=db.expenses.filter(e=>e.id!==id); saveDB(); renderAll();
+}
+function handleDrop(e){
+  e.preventDefault();document.getElementById('uploadZone').classList.remove('dragover');
+  const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))previewReceipt(f);
+}
+function handleReceiptUpload(e){const f=e.target.files[0];if(f)previewReceipt(f);e.target.value='';}
+
+// ── API Key management ──
+function openApiKeyModal(){
+  const existing=localStorage.getItem('barnApiKey')||'';
+  document.getElementById('apiKeyInput').value=existing;
+  openModal('modalApiKey');
+}
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(!k){alert('Please enter your API key.');return;}
+  localStorage.setItem('barnApiKey',k);
+  document.getElementById('apiKeyNote').style.display='none';
+  closeModal('modalApiKey');
+  alert('API key saved! You can now scan receipts.');
+}
+
+// ── Image compression ──
+function compressImage(file, maxW=1400, quality=0.82){
+  return new Promise(resolve=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      c.toBlob(blob=>{
+        const r=new FileReader();
+        r.onload=e=>{const d=e.target.result;resolve({base64:d.split(',')[1],dataUrl:d,mediaType:'image/jpeg'});}
+        r.readAsDataURL(blob);
+      },'image/jpeg',quality);
+    };
+    img.src=url;
+  });
+}
+function compressToThumb(dataUrl, maxW=400, quality=0.75){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg',quality));
+    };
+    img.src=dataUrl;
+  });
+}
+
+// ── Google Gemini Vision API call (free tier) ──
+async function callClaudeVision(base64,mediaType){
+  const apiKey=localStorage.getItem('barnApiKey');
+  if(!apiKey) throw new Error('NO_KEY');
+  const prompt=`You are analyzing a receipt for a horse boarding stable called Hidden Springs. Extract ALL line items from this receipt.
+
+For each item return:
+- description: item name/description
+- amount: dollar amount as a number
+- category: one of exactly: feed, bedding, vet, farrier, supplies, equipment, utilities, other
+
+Also extract the overall vendor name and the receipt date.
+
+Respond with ONLY valid JSON, no markdown fences, no explanation:
+{"vendor":"Store Name","date":"YYYY-MM-DD","items":[{"description":"Item name","amount":12.50,"category":"feed"}]}`;
+
+  const resp=await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[
+          {inline_data:{mime_type:mediaType,data:base64}},
+          {text:prompt}
+        ]}],
+        generationConfig:{temperature:0.1,maxOutputTokens:1200}
+      })
+    }
+  );
+  if(!resp.ok){const t=await resp.text();throw new Error('Gemini API '+resp.status+': '+t);}
+  const data=await resp.json();
+  if(data.error) throw new Error(data.error.message);
+  return data.candidates[0].content.parts[0].text;
+}
+
+// ── Receipt scanning flow ──
+let _scanThumbDataUrl=null;
+
+async function previewReceipt(file){
+  // Check API key first
+  if(!localStorage.getItem('barnApiKey')){
+    document.getElementById('apiKeyNote').style.display='block';
+    openApiKeyModal();
+    return;
+  }
+  // Show scanning state
+  const zone=document.getElementById('uploadZone');
+  const icon=document.getElementById('uploadZoneIcon');
+  const text=document.getElementById('uploadZoneText');
+  const sub=document.getElementById('uploadZoneSub');
+  zone.classList.add('scanning');
+  icon.textContent='⏳';
+  text.textContent='Scanning receipt with AI…';
+  sub.textContent='This takes a few seconds';
+
+  try {
+    const {base64,dataUrl,mediaType}=await compressImage(file);
+    _scanThumbDataUrl=await compressToThumb(dataUrl);
+
+    let parsed;
+    try{
+      const raw=await callClaudeVision(base64,mediaType);
+      // Strip markdown fences if any
+      const clean=raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+      parsed=JSON.parse(clean);
+    }catch(apiErr){
+      if(apiErr.message==='NO_KEY'){openApiKeyModal();return;}
+      // If parsing fails, fall back to manual entry with image
+      currentReceiptDataUrl=dataUrl;
+      const prev=document.getElementById('receiptPreview');
+      prev.src=dataUrl;prev.style.display='block';
+      openAddExpense();
+      alert('Could not parse receipt automatically. Please fill in the details manually.\n\nError: '+apiErr.message);
+      return;
+    }
+
+    // Show review modal
+    showReceiptReview(dataUrl, parsed);
+  } catch(e){
+    alert('Error scanning receipt: '+e.message);
+  } finally {
+    zone.classList.remove('scanning');
+    icon.textContent='🧾';
+    text.textContent='Click to upload a receipt, or drag & drop';
+    sub.textContent='AI will scan and categorize your expenses automatically';
+  }
+}
+
+function showReceiptReview(imageDataUrl, parsed){
+  const img=document.getElementById('reviewReceiptImg');
+  img.src=imageDataUrl;
+
+  const today=new Date().toISOString().split('T')[0];
+  const vendor=parsed.vendor||'';
+  const date=parsed.date||today;
+  const items=(parsed.items||[]).filter(i=>i.amount>0);
+
+  const catOptions=Object.keys(CE).map(k=>`<option value="${k}">${CE[k]} ${CL[k]}</option>`).join('');
+
+  document.getElementById('reviewContent').innerHTML=`
+    <div class="form-row" style="margin-bottom:12px;">
+      <div class="form-group" style="flex:2;"><label>Vendor</label><input id="rv_vendor" type="text" value="${esc(vendor)}"></div>
+      <div class="form-group"><label>Date</label><input id="rv_date" type="date" value="${date}"></div>
+    </div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:#3d3930;">Extracted Items (${items.length}) — edit or remove before adding:</div>
+    <div id="reviewItems">
+      ${items.length?items.map((it,i)=>`
+        <div class="receipt-item-row" id="ritem_${i}">
+          <input class="ri-desc" type="text" value="${esc(it.description)}" placeholder="Description" id="ri_desc_${i}">
+          <input class="ri-amt" type="number" step="0.01" min="0" value="${parseFloat(it.amount).toFixed(2)}" id="ri_amt_${i}">
+          <select class="ri-cat" id="ri_cat_${i}">${catOptions}</select>
+          <button class="btn btn-danger btn-sm" onclick="document.getElementById('ritem_${i}').remove()">✕</button>
+        </div>
+      `).join(''):'<p style="font-size:13px;color:#a09888;">No items found — add them manually below.</p>'}
+    </div>
+    <button class="btn btn-secondary btn-sm mt-8" onclick="addReviewItem()">＋ Add Item</button>
+  `;
+  // Set category values after DOM renders
+  items.forEach((it,i)=>{
+    const sel=document.getElementById('ri_cat_'+i);
+    if(sel&&CE[it.category])sel.value=it.category;
+  });
+  document.getElementById('btnConfirmReceipt').textContent=`＋ Add ${items.length} Expense${items.length!==1?'s':''}`;
+  openModal('modalReceiptReview');
+}
+
+function addReviewItem(){
+  const container=document.getElementById('reviewItems');
+  const i='new_'+Date.now();
+  const catOptions=Object.keys(CE).map(k=>`<option value="${k}">${CE[k]} ${CL[k]}</option>`).join('');
+  const div=document.createElement('div');div.className='receipt-item-row';div.id='ritem_'+i;
+  div.innerHTML=`
+    <input class="ri-desc" type="text" placeholder="Description" id="ri_desc_${i}">
+    <input class="ri-amt" type="number" step="0.01" min="0" placeholder="0.00" id="ri_amt_${i}">
+    <select class="ri-cat" id="ri_cat_${i}">${catOptions}</select>
+    <button class="btn btn-danger btn-sm" onclick="this.closest('.receipt-item-row').remove()">✕</button>
+  `;
+  container.appendChild(div);
+}
+
+async function confirmReceiptItems(){
+  const vendor=document.getElementById('rv_vendor').value.trim()||'Unknown';
+  const date=document.getElementById('rv_date').value||new Date().toISOString().split('T')[0];
+  const rows=document.querySelectorAll('#reviewItems .receipt-item-row');
+  const added=[];
+  rows.forEach(row=>{
+    const id=row.id.replace('ritem_','');
+    const desc=(document.getElementById('ri_desc_'+id)?.value||'').trim();
+    const amt=parseFloat(document.getElementById('ri_amt_'+id)?.value||0);
+    const cat=document.getElementById('ri_cat_'+id)?.value||'other';
+    if(desc&&amt>0){
+      added.push({id:uid(),vendor,amount:amt,date,category:cat,notes:desc,receiptThumb:_scanThumbDataUrl||null});
+    }
+  });
+  if(!added.length){alert('No valid items to add.');return;}
+  db.expenses.push(...added);
+  _scanThumbDataUrl=null;
+  saveDB();
+  closeModal('modalReceiptReview');
+  renderAll();
+  // Clear preview
+  const prev=document.getElementById('receiptPreview');prev.style.display='none';prev.src='';
+}
+
+function viewReceiptThumb(src){
+  document.getElementById('receiptImgFull').src=src;
+  openModal('modalReceiptImg');
+}
+
+// ════════════════════════════════
+//  FEED TRANSITIONS
+// ════════════════════════════════
+let _trRampStyle = 'standard';
+
+function rampPct(dayNum, totalDays, style) {
+  const p = dayNum / totalDays;
+  if (style === 'conservative') return Math.min(1, (Math.floor(p * 4) + 1) * 0.25);
+  if (style === 'cautious')     return Math.min(1, (Math.floor(p * 10) + 1) * 0.10);
+  return Math.min(1, p); // standard: linear
+}
+
+function transitionDay(tr, dateStr) {
+  const dayNum = Math.round((new Date(dateStr+'T12:00:00') - new Date(tr.startDate+'T12:00:00')) / 86400000) + 1;
+  if (dayNum < 1 || dayNum > tr.durationDays) return null;
+  const pct = rampPct(dayNum, tr.durationDays, tr.rampStyle);
+  const feeds = [
+    ...(tr.fromFeeds||[]).map(f => ({...f, lbs:+(f.lbsPerDay*(1-pct)).toFixed(1), isNew:false})).filter(f=>f.lbs>0),
+    ...(tr.toFeeds||[]).map(f => ({...f, lbs:+(f.lbsPerDay*pct).toFixed(1), isNew:true})).filter(f=>f.lbs>0),
+  ];
+  return {dayNum, totalDays:tr.durationDays, pct, feeds};
+}
+
+function activeTransitionForHorse(horseId) {
+  const today = new Date().toISOString().split('T')[0];
+  return (db.transitions||[]).find(tr =>
+    tr.horseId === horseId && tr.status === 'active' && today >= tr.startDate && transitionDay(tr, today)
+  );
+}
+
+function getTrDuration() {
+  const sel = document.getElementById('tr_duration').value;
+  if (sel === 'custom') return parseInt(document.getElementById('tr_customDays').value)||14;
+  return parseInt(sel);
+}
+
+function selectRamp(style, el) {
+  _trRampStyle = style;
+  document.querySelectorAll('.ramp-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  updatePreview();
+}
+
+function toggleTransitionType() {
+  const immediate = document.getElementById('tr_type').value === 'immediate';
+  document.getElementById('tr_fromSection').style.display = immediate ? 'none' : '';
+  document.getElementById('tr_schedSection').style.display = immediate ? 'none' : '';
+  document.getElementById('tr_previewSection').style.display = immediate ? 'none' : '';
+}
+
+function trGrainOptions() {
+  return (db.grainTypes||[]).map(g => `<option value="${g.id}">${esc(g.name)}</option>`).join('');
+}
+
+function addTrFeedRow(side, id='', lbs='') {
+  const container = document.getElementById('tr_'+side+'Feeds');
+  const rowId = 'tr_'+side+'_'+Date.now();
+  const div = document.createElement('div'); div.className='tr-feed-input-row'; div.id=rowId;
+  div.innerHTML = `
+    <select id="${rowId}_grain">${trGrainOptions()}</select>
+    <input id="${rowId}_lbs" type="number" min="0" step="0.5" placeholder="lbs/day" value="${lbs}">
+    <button class="btn btn-danger btn-sm" onclick="document.getElementById('${rowId}').remove();updatePreview();">✕</button>
+  `;
+  container.appendChild(div);
+  if (id) { const sel = document.getElementById(rowId+'_grain'); if (sel) sel.value = id; }
+  div.querySelector('input').addEventListener('input', updatePreview);
+  div.querySelector('select').addEventListener('change', updatePreview);
+}
+
+function prefillFromFeeds() {
+  const horseId = document.getElementById('tr_horse').value;
+  document.getElementById('tr_fromFeeds').innerHTML = '';
+  if (!horseId) return;
+  (db.grainTypes||[]).forEach(g => {
+    const lbs = db.grainSchedule[`${horseId}_${g.id}`]||0;
+    if (lbs > 0) addTrFeedRow('from', g.id, lbs);
+  });
+  updatePreview();
+}
+
+function collectTrFeeds(side) {
+  const rows = document.querySelectorAll(`#tr_${side}Feeds .tr-feed-input-row`);
+  return Array.from(rows).map(row => {
+    const grainId = row.querySelector('select')?.value||'';
+    const lbs = parseFloat(row.querySelector('input')?.value||0);
+    const grain = (db.grainTypes||[]).find(g=>g.id===grainId);
+    return grain && lbs > 0 ? {grainTypeId:grainId, name:grain.name, lbsPerDay:lbs} : null;
+  }).filter(Boolean);
+}
+
+function updatePreview() {
+  const previewEl = document.getElementById('tr_preview'); if (!previewEl) return;
+  const from = collectTrFeeds('from');
+  const to   = collectTrFeeds('to');
+  if (!from.length && !to.length) { previewEl.innerHTML='Fill in the feeds above to see the schedule preview.'; return; }
+  const dur = getTrDuration();
+  const style = _trRampStyle;
+  const fakeTr = {fromFeeds:from, toFeeds:to, durationDays:dur, rampStyle:style, startDate:'2000-01-01'};
+  // Preview days: 1, mid, last
+  const days = [1, Math.round(dur/2), dur].filter((d,i,a)=>a.indexOf(d)===i);
+  previewEl.innerHTML = days.map(d => {
+    const info = transitionDay(fakeTr, new Date(2000,0,d).toISOString().split('T')[0].replace(/\d{4}/,'2000'));
+    // Simpler: compute manually
+    const pct = rampPct(d, dur, style);
+    const feeds = [
+      ...from.map(f=>({name:f.name,lbs:+(f.lbsPerDay*(1-pct)).toFixed(1),isNew:false})).filter(f=>f.lbs>0),
+      ...to.map(f=>({name:f.name,lbs:+(f.lbsPerDay*pct).toFixed(1),isNew:true})).filter(f=>f.lbs>0),
+    ];
+    return `<div class="tr-preview-row">
+      <div class="tr-preview-day">Day ${d}</div>
+      <div style="flex:1;font-size:13px;">${feeds.map(f=>`<span style="color:${f.isNew?'#2e7d32':'#c62828'};margin-right:8px;">${f.name}: ${f.lbs} lbs</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function openNewTransition(horseId) {
+  _trRampStyle = 'standard';
+  document.getElementById('tr_label').value = '';
+  document.getElementById('tr_fromFeeds').innerHTML = '';
+  document.getElementById('tr_toFeeds').innerHTML = '';
+  document.getElementById('tr_start').value = new Date().toISOString().split('T')[0];
+  document.getElementById('tr_duration').value = '14';
+  document.getElementById('tr_customDaysWrap').style.display = 'none';
+  document.getElementById('tr_preview').innerHTML = 'Fill in the feeds above to see the schedule preview.';
+  document.querySelectorAll('.ramp-option').forEach((o,i)=>o.classList.toggle('selected',i===0));
+  document.getElementById('tr_type').value = 'gradual';
+  toggleTransitionType();
+  // Populate horse dropdown
+  const sel = document.getElementById('tr_horse');
+  sel.innerHTML = '<option value="">— Select horse —</option>' +
+    allHorses().map(h=>`<option value="${h.id}"${h.id===horseId?' selected':''}>${esc(h.name)} (${esc(h.clientName)})</option>`).join('');
+  if (horseId) { sel.value = horseId; prefillFromFeeds(); }
+  openModal('modalTransition');
+}
+
+function saveTransition() {
+  const horseId = document.getElementById('tr_horse').value;
+  if (!horseId) { alert('Please select a horse.'); return; }
+  const type = document.getElementById('tr_type').value;
+  const toFeeds = collectTrFeeds('to');
+  if (!toFeeds.length) { alert('Add at least one target feed.'); return; }
+  const fromFeeds = type==='gradual' ? collectTrFeeds('from') : [];
+  const dur = type==='gradual' ? getTrDuration() : 1;
+  const horse = allHorses().find(h=>h.id===horseId);
+  const tr = {
+    id: uid(),
+    horseId,
+    horseName: horse?.name||'',
+    clientName: horse?.clientName||'',
+    label: document.getElementById('tr_label').value.trim(),
+    type,
+    startDate: document.getElementById('tr_start').value || new Date().toISOString().split('T')[0],
+    durationDays: dur,
+    rampStyle: type==='gradual' ? _trRampStyle : 'standard',
+    status: 'active',
+    fromFeeds,
+    toFeeds,
+  };
+  if (!db.transitions) db.transitions = [];
+  db.transitions.push(tr);
+  saveDB(); closeModal('modalTransition'); renderTransitions();
+  // If immediate, apply the target grain schedule now
+  if (type === 'immediate') {
+    // Clear all current grain for this horse, apply target
+    if (confirm(`Apply target feed schedule to ${horse?.name||'horse'} now? This will update their grain schedule.`)) {
+      (db.grainTypes||[]).forEach(g => { db.grainSchedule[`${horseId}_${g.id}`] = 0; });
+      toFeeds.forEach(f => { db.grainSchedule[`${horseId}_${f.grainTypeId}`] = f.lbsPerDay; });
+      saveDB(); renderGrainSchedule();
+    }
+  }
+}
+
+function renderTransitions() {
+  const container = document.getElementById('transitionList'); if (!container) return;
+  const today = new Date().toISOString().split('T')[0];
+  const all = (db.transitions||[]).slice().reverse();
+  if (!all.length) {
+    container.innerHTML = '<div class="empty"><div class="ei">🔄</div><p>No transitions yet. Click ＋ New Transition to get started.</p></div>';
+    return;
+  }
+  // Update badge on tab if any active
+  const activeCount = all.filter(tr => tr.status==='active' && transitionDay(tr,today)).length;
+  const tabBtn = document.getElementById('transitionTabBtn');
+  if (tabBtn) tabBtn.textContent = activeCount ? `🔄 Transitions (${activeCount} active)` : '🔄 Transitions';
+
+  container.innerHTML = all.map(tr => {
+    const dayInfo = tr.type==='immediate' ? null : transitionDay(tr, today);
+    const pct = dayInfo ? dayInfo.pct : (tr.status==='completed'?1:0);
+    const fillPct = Math.round(pct*100);
+    const isActive = tr.status==='active' && (tr.type==='immediate'||dayInfo);
+    const statusLabel = tr.status==='completed'?'✓ Complete':tr.status==='cancelled'?'Cancelled':
+      tr.type==='immediate'?'Immediate':dayInfo?`Day ${dayInfo.dayNum} of ${tr.durationDays}`:`Starts ${tr.startDate}`;
+    const todayBlock = isActive && dayInfo ? `
+      <div class="tr-today">
+        <div class="tr-today-title">🗓 Today's Feeding — Day ${dayInfo.dayNum} of ${tr.durationDays}</div>
+        ${dayInfo.feeds.map(f=>`<div class="tr-feed-row ${f.isNew?'tr-feed-new':'tr-feed-old'}">${f.isNew?'▲':'▼'} ${esc(f.name)}<span>${f.lbs} lbs/day</span></div>`).join('')}
+      </div>` : '';
+    return `<div class="tr-card ${tr.status}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div class="tr-horse">🐴 ${esc(tr.horseName)} <span style="font-weight:400;font-size:13px;color:#6b6358;">· ${esc(tr.clientName)}</span></div>
+          ${tr.label?`<div class="tr-label">${esc(tr.label)}</div>`:''}
+        </div>
+        <div style="font-size:12px;color:#6b6358;text-align:right;">${statusLabel}</div>
+      </div>
+      ${tr.type==='gradual'?`<div class="tr-prog-wrap">
+        <div class="tr-prog-bar"><div class="tr-prog-fill" style="width:${fillPct}%"></div></div>
+        <div class="tr-prog-label">${fillPct}% complete · ${tr.rampStyle} ramp · ${tr.durationDays} days</div>
+      </div>`:''}
+      ${todayBlock}
+      <div style="margin-top:8px;font-size:12px;color:#a09888;">
+        <strong>From:</strong> ${(tr.fromFeeds||[]).map(f=>`${f.name} ${f.lbsPerDay}lbs`).join(', ')||'—'}
+        &nbsp;→&nbsp;
+        <strong>To:</strong> ${(tr.toFeeds||[]).map(f=>`${f.name} ${f.lbsPerDay}lbs`).join(', ')||'—'}
+      </div>
+      ${tr.status==='active'?`<div class="tr-actions">
+        ${tr.type==='gradual'?`<button class="btn btn-secondary btn-sm" onclick="applyTransitionToday('${tr.id}')">Apply Today's Schedule</button>`:''}
+        <button class="btn btn-primary btn-sm" onclick="completeTransition('${tr.id}')">✓ Mark Complete</button>
+        <button class="btn btn-danger btn-sm" onclick="cancelTransition('${tr.id}')">Cancel</button>
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function applyTransitionToday(id) {
+  const tr = (db.transitions||[]).find(t=>t.id===id); if (!tr) return;
+  const today = new Date().toISOString().split('T')[0];
+  const info = transitionDay(tr, today); if (!info) return;
+  if (!confirm(`Apply today's transition schedule to ${tr.horseName}'s grain card?\nThis will update their active lbs/day amounts.`)) return;
+  // Reset all grain for this horse
+  (db.grainTypes||[]).forEach(g => { db.grainSchedule[`${tr.horseId}_${g.id}`] = 0; });
+  info.feeds.forEach(f => {
+    if (f.grainTypeId) db.grainSchedule[`${tr.horseId}_${f.grainTypeId}`] = parseFloat(f.lbs)||0;
+  });
+  saveDB(); renderGrainSchedule();
+  alert(`${tr.horseName}'s grain schedule updated for today.`);
+}
+
+function completeTransition(id) {
+  const tr = (db.transitions||[]).find(t=>t.id===id); if (!tr) return;
+  if (!confirm(`Mark this transition complete and apply the final target feed schedule to ${tr.horseName}?`)) return;
+  tr.status = 'completed';
+  // Apply final target feeds to grain schedule
+  (db.grainTypes||[]).forEach(g => { db.grainSchedule[`${tr.horseId}_${g.id}`] = 0; });
+  (tr.toFeeds||[]).forEach(f => { if(f.grainTypeId) db.grainSchedule[`${tr.horseId}_${f.grainTypeId}`] = f.lbsPerDay; });
+  saveDB(); renderTransitions(); renderGrainSchedule();
+}
+
+function cancelTransition(id) {
+  if (!confirm('Cancel this transition?')) return;
+  const tr = (db.transitions||[]).find(t=>t.id===id); if (!tr) return;
+  tr.status = 'cancelled';
+  saveDB(); renderTransitions();
+}
+
+// ════════════════════════════════
+//  GRAIN — card-based schedule
+// ════════════════════════════════
+function allHorses(){return db.clients.flatMap(c=>(c.horses||[]).map(h=>({...h,clientName:c.name,clientId:c.id})));}
+
+function renderGrainSchedule() {
+  const cards = document.getElementById('grainScheduleCards');
+  const summary = document.getElementById('grainDailySummary');
+  const horses = allHorses();
+  const gts = db.grainTypes;
+
+  if (!gts.length) {
+    cards.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="ei">🌾</div><p>Add a grain type first using the button above.</p></div>`;
+    summary.innerHTML = ''; return;
+  }
+  if (!horses.length) {
+    cards.innerHTML = `<div class="empty" style="grid-column:1/-1;"><div class="ei">🐴</div><p>No horses yet.</p></div>`;
+    summary.innerHTML = ''; return;
+  }
+
+  cards.innerHTML = horses.map(h => {
+    const assigned = gts.filter(g => (db.grainSchedule[`${h.id}_${g.id}`] || 0) > 0);
+    const totalLbs    = assigned.reduce((s,g) => s + (db.grainSchedule[`${h.id}_${g.id}`]||0), 0);
+    const dailyCost   = assigned.reduce((s,g) => s + (db.grainSchedule[`${h.id}_${g.id}`]||0) * (parseFloat(g.costPerLb)||0), 0);
+    const dailyCharge = assigned.reduce((s,g) => s + (db.grainSchedule[`${h.id}_${g.id}`]||0) * (parseFloat(g.chargePerLb)||0), 0);
+    const margin = dailyCharge - dailyCost;
+    const rows = assigned.map(g => grainFeedRow(h.id, g.id, db.grainSchedule[`${h.id}_${g.id}`]||0)).join('');
+
+    const activeTr = activeTransitionForHorse(h.id);
+    return `<div class="hgcard" id="hgcard_${h.id}">
+      <div class="hgcard-header">
+        <div>
+          <div class="hgcard-name">${h.location==='pasture'?'🌿':'🏠'} ${esc(h.name)}${activeTr?`<span class="transition-badge">IN TRANSITION</span>`:''}</div>
+          <div class="hgcard-owner">${esc(h.clientName)}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn btn-secondary btn-sm" onclick="openNewTransition('${h.id}')" title="Start feed transition">🔄</button>
+          <span class="badge ${h.location}">${h.location==='pasture'?'Pasture':'Stall'}</span>
+        </div>
+      </div>
+      ${activeTr?`<div style="background:#fffbf0;border:1px solid #f0d890;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:12px;color:#7a6030;">⚠ Active transition: <strong>${activeTr.label||'Feed change in progress'}</strong> · <a href="#" onclick="showGrainTab('transitions',document.getElementById('transitionTabBtn'));return false;" style="color:#8b5e3c;">View schedule →</a></div>`:''}
+      <div id="hgrows_${h.id}">${rows}</div>
+      <button class="btn btn-secondary btn-sm" style="margin-top:4px;" onclick="addGrainRow('${h.id}')">＋ Add grain</button>
+      ${totalLbs > 0 ? `<div class="hgcard-footer">
+        <div class="hgcard-totals">
+          <div class="hgcard-total">
+            <div class="hgcard-total-val">${totalLbs % 1 === 0 ? totalLbs : totalLbs.toFixed(2)}</div>
+            <div class="hgcard-total-lbl">lbs/day</div>
+          </div>
+          <div class="hgcard-total">
+            <div class="hgcard-total-val cost">$${dailyCost.toFixed(2)}</div>
+            <div class="hgcard-total-lbl">our cost/day</div>
+          </div>
+          <div class="hgcard-total">
+            <div class="hgcard-total-val charge">$${dailyCharge.toFixed(2)}</div>
+            <div class="hgcard-total-lbl">we charge/day</div>
+          </div>
+          <div class="hgcard-total">
+            <div class="hgcard-total-val" style="color:${margin>=0?'#2d7a4f':'#c0392b'};">${margin>=0?'+':''}$${margin.toFixed(2)}</div>
+            <div class="hgcard-total-lbl">margin/day</div>
+          </div>
+        </div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+
+  let totLbs=0, totCost=0, totCharge=0;
+  horses.forEach(h => gts.forEach(g => {
+    const lbs = db.grainSchedule[`${h.id}_${g.id}`]||0;
+    totLbs    += lbs;
+    totCost   += lbs * (parseFloat(g.costPerLb)||0);
+    totCharge += lbs * (parseFloat(g.chargePerLb)||0);
+  }));
+  const days = daysIn(curY, curM);
+  if (totLbs > 0) {
+    summary.innerHTML = `<div class="grain-daily-summary">
+      <div class="gds-item"><div class="gds-val">${totLbs.toFixed(1)}</div><div class="gds-lbl">Total lbs/day</div></div>
+      <div class="gds-item"><div class="gds-val">$${totCost.toFixed(2)}</div><div class="gds-lbl">Grain cost/day</div></div>
+      <div class="gds-item"><div class="gds-val">$${totCharge.toFixed(2)}</div><div class="gds-lbl">Client charge/day</div></div>
+      <div class="gds-item"><div class="gds-val" style="color:#c9b99a;">$${(totCost*days).toFixed(0)}</div><div class="gds-lbl">Monthly grain cost</div></div>
+      <div class="gds-item"><div class="gds-val" style="color:#4caf50;">$${(totCharge*days).toFixed(0)}</div><div class="gds-lbl">Monthly grain billing</div></div>
+      <div class="gds-item"><div class="gds-val" style="color:${(totCharge-totCost)>=0?'#4caf50':'#f44336'};">${(totCharge-totCost)>=0?'+':''}$${((totCharge-totCost)*days).toFixed(0)}</div><div class="gds-lbl">Monthly margin</div></div>
+    </div>`;
+  } else {
+    summary.innerHTML = '';
+  }
+}
+
+function grainFeedRow(horseId, grainTypeId, lbs) {
+  const opts = db.grainTypes.map(g =>
+    `<option value="${g.id}" ${g.id===grainTypeId?'selected':''}>${esc(g.name)}</option>`
+  ).join('');
+  return `<div class="grain-feed-row" id="gfr_${horseId}_${grainTypeId}">
+    <select class="grain-type-select" onchange="changeGrainType('${horseId}','${grainTypeId}',this.value)">${opts}</select>
+    <input class="grain-lbs-input" type="number" step="0.25" min="0" max="99" placeholder="0"
+           value="${lbs||''}"
+           onchange="updateGrainLbs('${horseId}','${grainTypeId}',this.value)"
+           onblur="updateGrainLbs('${horseId}','${grainTypeId}',this.value)">
+    <span class="grain-lbs-label">lbs/day</span>
+    <button class="btn btn-danger btn-sm" onclick="removeGrainRow('${horseId}','${grainTypeId}')">✕</button>
+  </div>`;
+}
+
+function addGrainRow(horseId) {
+  const used = new Set(db.grainTypes.filter(g=>(db.grainSchedule[`${horseId}_${g.id}`]||0)>0).map(g=>g.id));
+  const available = db.grainTypes.find(g=>!used.has(g.id));
+  if (!available) { alert('All grain types are already assigned to this horse. Add a new grain type first.'); return; }
+  const rowsEl = document.getElementById('hgrows_'+horseId);
+  const tmp = document.createElement('div');
+  tmp.innerHTML = grainFeedRow(horseId, available.id, '');
+  rowsEl.appendChild(tmp.firstElementChild);
+  rowsEl.lastElementChild.querySelector('.grain-lbs-input').focus();
+}
+
+function updateGrainLbs(horseId, grainTypeId, val) {
+  const lbs = parseFloat(val);
+  const k = `${horseId}_${grainTypeId}`;
+  if (!isNaN(lbs) && lbs > 0) db.grainSchedule[k] = lbs;
+  else delete db.grainSchedule[k];
+  saveDB();
+  renderGrainSchedule();
+}
+
+function changeGrainType(horseId, oldGrainTypeId, newGrainTypeId) {
+  if (oldGrainTypeId === newGrainTypeId) return;
+  if (db.grainSchedule[`${horseId}_${newGrainTypeId}`] > 0) {
+    alert('That grain type is already assigned to this horse.');
+    renderGrainSchedule(); return;
+  }
+  const oldLbs = db.grainSchedule[`${horseId}_${oldGrainTypeId}`] || 0;
+  delete db.grainSchedule[`${horseId}_${oldGrainTypeId}`];
+  if (oldLbs > 0) db.grainSchedule[`${horseId}_${newGrainTypeId}`] = oldLbs;
+  saveDB();
+  renderGrainSchedule();
+}
+
+function removeGrainRow(horseId, grainTypeId) {
+  delete db.grainSchedule[`${horseId}_${grainTypeId}`];
+  saveDB();
+  renderGrainSchedule();
+}
+
+function renderGrainTypes(){
+  const el=document.getElementById('grainTypeList');
+  if(!db.grainTypes.length){el.innerHTML='<div class="empty" style="padding:16px;"><div class="ei">🌾</div><p>No grain types yet.</p></div>';return;}
+  el.innerHTML=db.grainTypes.map(g=>{
+    const cost=parseFloat(g.costPerLb||0),charge=parseFloat(g.chargePerLb||0),margin=charge-cost;
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0ece6;flex-wrap:wrap;gap:8px;">
+      <div>
+        <span style="font-weight:600;font-size:15px;">${esc(g.name)}</span>
+        <div style="margin-top:4px;display:flex;gap:16px;flex-wrap:wrap;">
+          <span style="font-size:13px;color:#6b6358;">Your cost: <strong>$${cost.toFixed(3)}/lb</strong></span>
+          <span style="font-size:13px;color:#6b6358;">Client charge: <strong>$${charge.toFixed(3)}/lb</strong></span>
+          ${cost>0||charge>0?`<span style="font-size:13px;color:${margin>=0?'#2d7a4f':'#c0392b'};">Margin: <strong>${margin>=0?'+':''}$${margin.toFixed(3)}/lb</strong></span>`:''}
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="openEditGrainType('${g.id}')">✏️ Edit</button>
+    </div>`;
+  }).join('');
+}
+function openAddGrainType(){
+  document.getElementById('grainTypeModalTitle').textContent='Add Grain Type';
+  document.getElementById('btnSaveGrain').textContent='Add Grain Type';
+  document.getElementById('btnDeleteGrain').style.display='none';
+  document.getElementById('gt_id').value='';
+  ['gt_name','gt_cost','gt_charge'].forEach(id=>document.getElementById(id).value='');
+  openModal('modalGrainType');
+}
+function openEditGrainType(id){
+  const g=db.grainTypes.find(x=>x.id===id);if(!g)return;
+  document.getElementById('grainTypeModalTitle').textContent='Edit Grain Type';
+  document.getElementById('btnSaveGrain').textContent='Save Changes';
+  document.getElementById('btnDeleteGrain').style.display='inline-flex';
+  document.getElementById('gt_id').value=g.id;
+  document.getElementById('gt_name').value=g.name;
+  document.getElementById('gt_cost').value=g.costPerLb||'';
+  document.getElementById('gt_charge').value=g.chargePerLb||'';
+  openModal('modalGrainType');
+}
+function saveGrainType(){
+  const name=document.getElementById('gt_name').value.trim();if(!name){alert('Enter a grain name.');return;}
+  const id=document.getElementById('gt_id').value;
+  const data={name,costPerLb:parseFloat(document.getElementById('gt_cost').value)||0,chargePerLb:parseFloat(document.getElementById('gt_charge').value)||0};
+  if(id){const idx=db.grainTypes.findIndex(x=>x.id===id);if(idx>-1)db.grainTypes[idx]={...db.grainTypes[idx],...data};}
+  else db.grainTypes.push({id:uid(),...data});
+  saveDB();closeModal('modalGrainType');renderGrainTypes();renderGrainSchedule();
+}
+function deleteGrainTypeFromModal(){
+  const id=document.getElementById('gt_id').value;if(!id)return;
+  if(!confirm('Delete this grain type?'))return;
+  db.grainTypes=db.grainTypes.filter(g=>g.id!==id);
+  Object.keys(db.grainSchedule).forEach(k=>{if(k.endsWith('_'+id))delete db.grainSchedule[k];});
+  saveDB();closeModal('modalGrainType');renderGrainTypes();renderGrainSchedule();
+}
+
+function renderGrainBilling(){
+  document.getElementById('grainBillingLabel').textContent=mLabel();
+  const days=daysIn(curY,curM),rows=[];
+  db.clients.forEach(c=>{(c.horses||[]).forEach(h=>{db.grainTypes.forEach(g=>{const lbs=db.grainSchedule[`${h.id}_${g.id}`];if(!lbs)return;const totalLbs=lbs*days,bill=totalLbs*(parseFloat(g.chargePerLb)||0);rows.push({clientName:c.name,horseName:h.name,grainName:g.name,lbs,days,totalLbs,costPerLb:parseFloat(g.costPerLb)||0,chargePerLb:parseFloat(g.chargePerLb)||0,bill});});});});
+  const tbody=document.getElementById('grainBillingBody');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="9"><div class="empty" style="padding:16px;"><p>No grain scheduled yet.</p></div></td></tr>';return;}
+  const grand=rows.reduce((s,r)=>s+r.bill,0);
+  tbody.innerHTML=rows.map(r=>`<tr><td>${esc(r.clientName)}</td><td>${esc(r.horseName)}</td><td>${esc(r.grainName)}</td><td>${r.lbs}</td><td>${r.days}</td><td>${r.totalLbs.toFixed(1)}</td><td>$${r.costPerLb.toFixed(3)}</td><td>$${r.chargePerLb.toFixed(3)}</td><td><strong>$${r.bill.toFixed(2)}</strong></td></tr>`).join('')+`<tr style="background:#f5f3ee;font-weight:700;"><td colspan="8" style="text-align:right;padding:10px 12px;">Total Grain to Bill:</td><td style="padding:10px 12px;">$${grand.toFixed(2)}</td></tr>`;
+}
+
+// ════════════════════════════════
+//  P&L
+// ════════════════════════════════
+let _charts = {};
+function _dc(id){if(_charts[id]){_charts[id].destroy();delete _charts[id];}}
+
+function monthlyStats(y,m){
+  const days=daysIn(y,m);
+  const boardRec=db.clients.reduce((s,c)=>{const p=db.payments[`${c.id}_${y}_${m}`];return s+(p&&p.paid?clientTotal(c):0);},0);
+  const boardExp=db.clients.reduce((s,c)=>s+clientTotal(c),0);
+  const horses=allHorses();
+  let gRev=0,gCost=0;
+  db.grainTypes.forEach(g=>{horses.forEach(h=>{const lbs=(db.grainSchedule[`${h.id}_${g.id}`]||0)*days;gRev+=lbs*(parseFloat(g.chargePerLb)||0);gCost+=lbs*(parseFloat(g.costPerLb)||0);});});
+  const mE=db.expenses.filter(e=>{if(!e.date)return false;const d=new Date(e.date+'T12:00:00');return d.getFullYear()===y&&d.getMonth()+1===m;});
+  const otExp=mE.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  const rcExp=(db.recurringExpenses||[]).reduce((s,r)=>{if(!r.active)return s;return s+(r.type==='daily'?(parseFloat(r.dailyCost)||0)*days:(parseFloat(r.monthlyAmount)||0));},0);
+  return{boardRec,boardExp,gRev,gCost,otExp,rcExp,totalExp:otExp+rcExp,totalRev:boardRec+gRev,net:boardRec+gRev-otExp-rcExp,grainMargin:gRev-gCost};
+}
+
+function renderPnl(){
+  document.getElementById('pnlMonthLabel').textContent=mLabel();
+  const s=monthlyStats(curY,curM);
+  const pct=(s.grainMargin>0&&s.gRev>0)?((s.grainMargin/s.gRev)*100).toFixed(0):0;
+
+  document.getElementById('pnlStats').innerHTML=`
+    <div class="stat-card green"><div class="stat-label">Total Revenue</div><div class="stat-value" style="font-size:22px;">$${s.totalRev.toLocaleString()}</div><div class="stat-sub">$${s.boardRec.toLocaleString()} board · $${s.gRev.toFixed(0)} grain</div></div>
+    <div class="stat-card red"><div class="stat-label">Total Expenses</div><div class="stat-value" style="font-size:22px;">$${s.totalExp.toLocaleString()}</div><div class="stat-sub">$${s.otExp.toFixed(0)} one-time · $${s.rcExp.toFixed(0)} recurring</div></div>
+    <div class="stat-card ${s.net>=0?'green':'red'}"><div class="stat-label">Net Profit</div><div class="stat-value" style="font-size:22px;">${s.net>=0?'+':'−'}$${Math.abs(s.net).toLocaleString()}</div><div class="stat-sub">${mLabel()}</div></div>
+    <div class="stat-card ${s.grainMargin>=0?'green':'red'}"><div class="stat-label">Grain Margin</div><div class="stat-value" style="font-size:22px;">${s.grainMargin>=0?'+':'−'}$${Math.abs(s.grainMargin).toFixed(0)}</div><div class="stat-sub">${pct}% on $${s.gRev.toFixed(0)} billed</div></div>`;
+
+  const now=new Date(), months=[];
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({y:d.getFullYear(),m:d.getMonth()+1,label:MN[d.getMonth()].slice(0,3)});}
+  const td=months.map(({y,m})=>monthlyStats(y,m));
+  _dc('chartTrend');
+  const ctxT=document.getElementById('chartTrend')?.getContext('2d');
+  if(ctxT) _charts['chartTrend']=new Chart(ctxT,{type:'line',data:{
+    labels:months.map(x=>x.label+' '+(x.y%100)),
+    datasets:[
+      {label:'Revenue',data:td.map(d=>d.totalRev),borderColor:'#2d7a4f',backgroundColor:'rgba(45,122,79,.12)',tension:.35,fill:true,pointRadius:4,pointBackgroundColor:'#2d7a4f'},
+      {label:'Expenses',data:td.map(d=>d.totalExp),borderColor:'#c0392b',backgroundColor:'rgba(192,57,43,.08)',tension:.35,fill:true,pointRadius:4,pointBackgroundColor:'#c0392b'},
+      {label:'Net',data:td.map(d=>d.net),borderColor:'#8b5e3c',backgroundColor:'transparent',tension:.35,borderDash:[5,3],pointRadius:4,pointBackgroundColor:'#8b5e3c'},
+    ]},options:{responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{position:'top',labels:{font:{size:12},usePointStyle:true}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: $${c.raw.toLocaleString()}`}}},
+      scales:{y:{ticks:{callback:v=>'$'+v.toLocaleString()},grid:{color:'#f0ece6'}},x:{grid:{display:false}}}}
+  });
+
+  _dc('chartRevExp');
+  const ctxB=document.getElementById('chartRevExp')?.getContext('2d');
+  if(ctxB) _charts['chartRevExp']=new Chart(ctxB,{type:'bar',data:{
+    labels:['Board\nRevenue','Grain\nRevenue','One-Time\nExpenses','Recurring\nExpenses'],
+    datasets:[{data:[s.boardRec,s.gRev,s.otExp,s.rcExp],
+      backgroundColor:['#2d7a4f','#4caf50','#c0392b','#e74c3c'],borderRadius:7,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` $${c.raw.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0})}`}}},
+      scales:{y:{ticks:{callback:v=>'$'+v.toLocaleString()},grid:{color:'#f0ece6'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+
+  _dc('chartRevMix');
+  const ctxRM=document.getElementById('chartRevMix')?.getContext('2d');
+  if(ctxRM&&(s.boardRec+s.gRev)>0) _charts['chartRevMix']=new Chart(ctxRM,{type:'doughnut',data:{
+    labels:['Board Revenue','Grain Revenue'],
+    datasets:[{data:[s.boardRec,s.gRev],backgroundColor:['#2d7a4f','#4caf50'],borderWidth:3,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{
+      legend:{position:'bottom',labels:{font:{size:12},padding:14,usePointStyle:true}},
+      tooltip:{callbacks:{label:c=>` ${c.label}: $${c.raw.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0})}`}}}}
+  });
+
+  _dc('chartExpBreakdown');
+  const expCats={};
+  db.expenses.filter(e=>{if(!e.date)return false;const d=new Date(e.date+'T12:00:00');return d.getFullYear()===curY&&d.getMonth()+1===curM;})
+    .forEach(e=>{const lbl=CL[e.category]||e.category;expCats[lbl]=(expCats[lbl]||0)+(parseFloat(e.amount)||0);});
+  (db.recurringExpenses||[]).forEach(r=>{if(!r.active)return;expCats[r.name]=(expCats[r.name]||0)+recurringMonthlyAmount(r);});
+  const eLabels=Object.keys(expCats),eVals=eLabels.map(k=>expCats[k]);
+  const PALETTE=['#c0392b','#e74c3c','#e67e22','#f39c12','#8e44ad','#2980b9','#16a085','#7f8c8d','#d35400','#27ae60'];
+  const ctxED=document.getElementById('chartExpBreakdown')?.getContext('2d');
+  if(ctxED&&eLabels.length) _charts['chartExpBreakdown']=new Chart(ctxED,{type:'doughnut',data:{
+    labels:eLabels,datasets:[{data:eVals,backgroundColor:PALETTE,borderWidth:3,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{
+      legend:{position:'bottom',labels:{font:{size:11},padding:10,usePointStyle:true}},
+      tooltip:{callbacks:{label:c=>` ${c.label}: $${c.raw.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0})}`}}}}
+  });
+
+  _dc('chartGrain');
+  const horses=allHorses(),days=daysIn(curY,curM);
+  const gLabels=[],gCosts=[],gRevs=[],gMargins=[];
+  db.grainTypes.forEach(g=>{
+    let tc=0,tr=0;
+    horses.forEach(h=>{const lbs=(db.grainSchedule[`${h.id}_${g.id}`]||0)*days;tc+=lbs*(parseFloat(g.costPerLb)||0);tr+=lbs*(parseFloat(g.chargePerLb)||0);});
+    if(tc>0||tr>0){gLabels.push(g.name);gCosts.push(parseFloat(tc.toFixed(2)));gRevs.push(parseFloat(tr.toFixed(2)));gMargins.push(parseFloat((tr-tc).toFixed(2)));}
+  });
+  const pnlGCard=document.getElementById('pnlGrainCard');
+  if(gLabels.length){
+    pnlGCard.style.display='';
+    const ctxG=document.getElementById('chartGrain')?.getContext('2d');
+    if(ctxG) _charts['chartGrain']=new Chart(ctxG,{type:'bar',data:{
+      labels:gLabels,
+      datasets:[
+        {label:'Our Cost',data:gCosts,backgroundColor:'#e74c3c',borderRadius:4},
+        {label:'We Charge',data:gRevs,backgroundColor:'#2d7a4f',borderRadius:4},
+        {label:'Margin',data:gMargins,backgroundColor:'#4caf50',borderRadius:4},
+      ]},
+      options:{responsive:true,maintainAspectRatio:true,
+        plugins:{legend:{position:'top',labels:{font:{size:12},usePointStyle:true}},
+          tooltip:{callbacks:{label:c=>` ${c.dataset.label}: $${c.raw.toFixed(2)}`}}},
+        scales:{y:{ticks:{callback:v=>'$'+v.toLocaleString()},grid:{color:'#f0ece6'}},x:{grid:{display:false}}}}
+    });
+    document.getElementById('pnlGrainSummary').innerHTML=`
+      <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid #f0ece6;justify-content:center;">
+        <div style="text-align:center;"><div style="font-size:16px;font-weight:700;color:#e74c3c;">$${s.gCost.toFixed(2)}</div><div style="font-size:10px;color:#a09888;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">our cost</div></div>
+        <div style="text-align:center;"><div style="font-size:16px;font-weight:700;color:#2d7a4f;">$${s.gRev.toFixed(2)}</div><div style="font-size:10px;color:#a09888;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">we charge</div></div>
+        <div style="text-align:center;"><div style="font-size:16px;font-weight:700;color:${s.grainMargin>=0?'#2d7a4f':'#c0392b'};">${s.grainMargin>=0?'+':'−'}$${Math.abs(s.grainMargin).toFixed(2)}</div><div style="font-size:10px;color:#a09888;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">margin</div></div>
+        <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">${pct}%</div><div style="font-size:10px;color:#a09888;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;">margin %</div></div>
+      </div>`;
+  } else {
+    pnlGCard.style.display='none';
+  }
+}
+
+// ════════════════════════════════
+//  VENMO STATEMENT IMPORT
+// ════════════════════════════════
+function handleVenmoCSV(e) {
+  const f = e.target.files[0]; if (!f) return; e.target.value = '';
+  const r = new FileReader();
+  r.onload = ev => showVenmoImport(ev.target.result);
+  r.readAsText(f);
+}
+
+function parseCSVLine(line) {
+  const result = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { if (inQ && line[i+1]==='"') { cur += '"'; i++; } else inQ = !inQ; }
+    else if (ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+    else cur += ch;
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+function showVenmoImport(text) {
+  const lines = text.split(/\r?\n/);
+  const hi = lines.findIndex(l => /datetime|date.*type|type.*date/i.test(l) || (l.includes('From') && l.includes('Amount')));
+  if (hi === -1) { alert('Could not find transaction headers in this file.\nMake sure you\'re uploading a Venmo CSV export (Settings → Statements → Download).'); return; }
+
+  const rawHeaders = parseCSVLine(lines[hi]);
+  const headers = rawHeaders.map(h => h.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g,'_').replace(/^_|_$/g,''));
+
+  const idx = {
+    datetime: headers.findIndex(h => h.includes('datetime') || h === 'date'),
+    status:   headers.findIndex(h => h === 'status'),
+    note:     headers.findIndex(h => h === 'note'),
+    from:     headers.findIndex(h => h === 'from'),
+    amount:   headers.findIndex(h => h.includes('amount') && h.includes('total')) !== -1
+                ? headers.findIndex(h => h.includes('amount') && h.includes('total'))
+                : headers.findIndex(h => h.includes('amount')),
+  };
+
+  const transactions = [];
+  for (let i = hi + 1; i < lines.length; i++) {
+    const line = lines[i].trim(); if (!line) continue;
+    const cols = parseCSVLine(lines[i]);
+    const amtStr = (cols[idx.amount] || '').replace(/\s/g,'');
+    if (!amtStr.includes('+')) continue;
+    const status = (cols[idx.status] || '').toLowerCase();
+    if (status && status !== 'complete' && status !== 'completed' && status !== '') continue;
+    const amount = parseFloat(amtStr.replace(/[^0-9.]/g,'')) || 0;
+    if (!amount) continue;
+    const fromRaw = cols[idx.from] || '';
+    const note    = cols[idx.note] || '';
+    const dateRaw = cols[idx.datetime] || '';
+    let date = '';
+    try { const d = new Date(dateRaw); if (!isNaN(d)) date = d.toISOString().split('T')[0]; } catch(e){}
+    transactions.push({ from: fromRaw.trim(), note: note.trim(), amount, date, matched: matchClientByName(fromRaw) });
+  }
+
+  if (!transactions.length) {
+    alert('No incoming completed payments found.\nMake sure you\'re uploading a Venmo statement with payments sent TO you.');
+    return;
+  }
+
+  window._venmoTxns = transactions;
+  renderVenmoImport(transactions);
+  openModal('modalVenmoImport');
+}
+
+function matchClientByName(fromName) {
+  if (!fromName) return null;
+  const fn = fromName.toLowerCase().replace(/[^a-z\s]/g,'');
+  let best = null, bestScore = 0;
+  db.clients.forEach(c => {
+    const cn = c.name.toLowerCase().replace(/[^a-z\s]/g,'');
+    let score = 0;
+    cn.split(/\s+/).forEach(w => { if (w.length > 1 && fn.includes(w)) score += w.length * 2; });
+    fn.split(/\s+/).forEach(w => { if (w.length > 1 && cn.includes(w)) score += w.length; });
+    if (score > bestScore) { bestScore = score; best = c; }
+  });
+  return bestScore >= 3 ? best : null;
+}
+
+function renderVenmoImport(txns) {
+  const el = document.getElementById('venmoImportContent');
+  const autoMatched = txns.filter(t => t.matched).length;
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:13px;color:#6b6358;">${txns.length} incoming payment${txns.length!==1?'s':''} found · ${autoMatched} auto-matched</span>
+      <label style="font-size:12px;color:#6b6358;display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="venmoCheckAll" onchange="venmoToggleAll(this)" ${autoMatched>0?'checked':''}> Select all matched
+      </label>
+    </div>
+    <div style="overflow-y:auto;max-height:340px;border:1px solid #e8e3db;border-radius:10px;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#faf8f5;position:sticky;top:0;">
+          <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #e8e3db;width:32px;">✓</th>
+          <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e8e3db;">From (Venmo)</th>
+          <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e8e3db;">Amount</th>
+          <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e8e3db;">Date</th>
+          <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e8e3db;">Note</th>
+          <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e8e3db;">Match to Client</th>
+        </tr></thead>
+        <tbody>
+          ${txns.map((t,i) => `<tr style="border-bottom:1px solid #f0ece6;${t.matched?'':'background:#fffbf0;'}">
+            <td style="padding:8px 10px;text-align:center;">
+              <input type="checkbox" class="venmo-chk" data-idx="${i}" ${t.matched?'checked':''}>
+            </td>
+            <td style="padding:8px 10px;font-weight:600;">${esc(t.from)}</td>
+            <td style="padding:8px 10px;color:#2d7a4f;font-weight:700;">+$${t.amount.toFixed(2)}</td>
+            <td style="padding:8px 10px;color:#6b6358;white-space:nowrap;">${t.date||'—'}</td>
+            <td style="padding:8px 10px;color:#6b6358;font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(t.note)}">${esc(t.note)||'—'}</td>
+            <td style="padding:8px 10px;">
+              <select class="venmo-client-sel" data-idx="${i}"
+                style="border:1px solid ${t.matched?'#d8d3cc':'#f0a020'};border-radius:6px;padding:4px 6px;font-size:12px;min-width:130px;background:${t.matched?'#fff':'#fffbf0'};">
+                <option value="">— no match —</option>
+                ${db.clients.map(c=>`<option value="${c.id}" ${t.matched?.id===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}
+              </select>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:11px;color:#a09888;margin-top:8px;">⚠️ Rows with orange borders had no auto-match — pick the right client manually before applying.</p>`;
+  document.getElementById('btnApplyVenmo').style.display = 'inline-flex';
+}
+
+function venmoToggleAll(cb) {
+  document.querySelectorAll('.venmo-chk').forEach(c => {
+    const i = parseInt(c.dataset.idx);
+    const sel = document.querySelector(`.venmo-client-sel[data-idx="${i}"]`);
+    if (cb.checked && sel?.value) c.checked = true;
+    else if (!cb.checked) c.checked = false;
+  });
+}
+
+function applyVenmoImport() {
+  const txns = window._venmoTxns || [];
+  let count = 0, skipped = 0;
+  document.querySelectorAll('.venmo-chk').forEach(chk => {
+    if (!chk.checked) return;
+    const i = parseInt(chk.dataset.idx);
+    const sel = document.querySelector(`.venmo-client-sel[data-idx="${i}"]`);
+    const clientId = sel?.value;
+    if (!clientId) { skipped++; return; }
+    const t = txns[i];
+    let y = curY, m = curM;
+    if (t.date) { const d = new Date(t.date+'T12:00:00'); if (!isNaN(d)) { y = d.getFullYear(); m = d.getMonth()+1; } }
+    const k = `${clientId}_${y}_${m}`;
+    db.payments[k] = { paid: true, paidDate: t.date || new Date().toISOString().split('T')[0], amount: t.amount, source: 'venmo_import' };
+    count++;
+  });
+  if (!count && skipped > 0) { alert(`${skipped} row${skipped!==1?'s':''} checked but no client was selected. Pick a client from the dropdown first.`); return; }
+  if (!count) { alert('No rows were checked. Check at least one payment to apply.'); return; }
+  saveDB(); closeModal('modalVenmoImport'); renderAll();
+  alert(`✓ ${count} payment${count!==1?'s':''} recorded!${skipped?`\n(${skipped} skipped — no client matched)`:''}`);
+}
+
+// ════════════════════════════════
+//  MODAL & UTIL
+// ════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeModal(this.id);}));
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function renderAll(){renderOverview();renderClients();renderExpenses();if(document.getElementById('tab-pnl')?.classList.contains('active'))renderPnl();}
+
+// ════════════════════════════════
+//  INIT
+// ════════════════════════════════
+initMonth();
+init();
+if(!localStorage.getItem('barnApiKey')){
+  document.getElementById('apiKeyNote').style.display='block';
+}
+document.getElementById('tr_duration')?.addEventListener('change',function(){
+  document.getElementById('tr_customDaysWrap').style.display=this.value==='custom'?'':'none';
+  updatePreview();
+});
+</script>
+</body>
+</html>
