@@ -1,10 +1,4 @@
-<html lang="en"><head></head><body>https://raw.githubusercontent.com/HiddenSprings2022/barn-dashboard/main/index.html
-→ https://raw.githubusercontent.com/HiddenSprings2022/barn-dashboard/main/index.html
-Content-Type: text/plain; charset=utf-8
-
-
-
-
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Stables at Hidden Springs</title>
@@ -263,8 +257,8 @@ Content-Type: text/plain; charset=utf-8
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-
-
+</head>
+<body>
 
 <!-- ═══ HEADER ═══ -->
 <div class="header">
@@ -296,7 +290,7 @@ Content-Type: text/plain; charset=utf-8
     <span id="syncLabel">🟢 Synced</span>
   </div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-    <span id="syncTime" style="color:#6b6358;">Last sync: 09:40 AM</span>
+    <span id="syncTime" style="color:#6b6358;">Last sync: 09:51 AM</span>
     <button class="sync-btn" onclick="syncNow()">↻ Sync Now</button>
     <button class="sync-btn" onclick="openApiKeyModal()" title="Set free Gemini API key for receipt scanning">🔑 AI Key</button>
     <button class="sync-btn" onclick="exportData()">⬇ Export</button>
@@ -315,8 +309,8 @@ Content-Type: text/plain; charset=utf-8
 <div class="tabs">
   <div class="tab" onclick="showTab('overview',this)">📊 Overview</div>
   <div class="tab" onclick="showTab('clients',this)">🏠 Clients &amp; Payments</div>
-  <div class="tab active" onclick="showTab('expenses',this)">💰 Expenses</div>
-  <div class="tab" onclick="showTab('grain',this)">🌾 Grain</div>
+  <div class="tab" onclick="showTab('expenses',this)">💰 Expenses</div>
+  <div class="tab active" onclick="showTab('grain',this)">🌾 Grain</div>
   <div class="tab" onclick="showTab('pnl',this)">📈 P&amp;L</div>
   <div class="tab" onclick="showTab('invoices',this)">📋 Invoices</div>
 </div>
@@ -871,7 +865,7 @@ Content-Type: text/plain; charset=utf-8
   </div>
 
   <!-- EXPENSES -->
-  <div class="section active" id="tab-expenses">
+  <div class="section" id="tab-expenses">
     <div class="section-header">
       <h2>Expenses</h2>
       <button class="btn btn-primary" onclick="openAddExpense()">＋ Add Expense</button>
@@ -983,7 +977,7 @@ Content-Type: text/plain; charset=utf-8
   </div>
 
   <!-- GRAIN -->
-  <div class="section" id="tab-grain">
+  <div class="section active" id="tab-grain">
     <div class="section-header"><h2>Grain Tracking</h2></div>
     <div class="inner-tabs">
       <button class="inner-tab active" onclick="showGrainTab('schedule',this)">Feed Schedule</button>
@@ -1395,81 +1389,31 @@ Content-Type: text/plain; charset=utf-8
 
   <!-- P&L -->
   <div class="section" id="tab-pnl">
-    <div class="section-header"><h2>Profit &amp; Loss — <span id="pnlMonthLabel">May 2026</span></h2></div>
-    <div class="stat-grid" id="pnlStats">
-      <div class="stat-card green"><div class="stat-label">Board Revenue</div><div class="stat-value" style="font-size:22px;">$9,675</div><div class="stat-sub">14 clients · May 2026</div></div>
-      <div class="stat-card"><div class="stat-label">Grain Revenue</div><div class="stat-value" style="font-size:22px;">$2071</div><div class="stat-sub">Cost: $1713</div></div>
-      <div class="stat-card red"><div class="stat-label">Total Expenses</div><div class="stat-value" style="font-size:22px;">$3045</div><div class="stat-sub">Recurring: $2730</div></div>
-      <div class="stat-card green"><div class="stat-label">Net Profit</div><div class="stat-value" style="font-size:22px;">+$6988</div><div class="stat-sub">Revenue $11746 - Expenses $3045</div></div>
-      <div class="stat-card" style="grid-column:1/-1;">
-        <div class="card-title" style="margin-bottom:10px;">Client Payments — May 2026</div>
-        <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Naomi</strong> <span style="color:#a09888;">Beau, Shadow, Patty</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $1,550</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>JessicaJ</strong> <span style="color:#a09888;">Prada, Flirt</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $1,200</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Marlene</strong> <span style="color:#a09888;">Gunny</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $350</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Ashley</strong> <span style="color:#a09888;">Cat</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $350</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Deb</strong> <span style="color:#a09888;">Beauty, Ellie</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $1,200</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Anne</strong> <span style="color:#a09888;">Kai</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Emily</strong> <span style="color:#a09888;">Jet</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Tanya</strong> <span style="color:#a09888;">Dream</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $350</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Laura</strong> <span style="color:#a09888;">Lai Lai</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>JessicaR</strong> <span style="color:#a09888;">Mandrid</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Erica</strong> <span style="color:#a09888;">Chichi</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $475</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Brooke</strong> <span style="color:#a09888;">Odin</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Shelby</strong> <span style="color:#a09888;">Tre</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
-      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
-        <span><strong>Sue</strong> <span style="color:#a09888;">Ravi</span></span>
-        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
-      </div>
-      </div></div>
+    <div class="section-header"><h2>Profit &amp; Loss — <span id="pnlMonthLabel"></span></h2></div>
+    <div class="stat-grid" id="pnlStats"></div>
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title">6-Month Revenue &amp; Expense Trend</div>
-      <canvas id="chartTrend" height="303" style="display: block; box-sizing: border-box; height: 303px; width: 1010px;" width="1010"></canvas>
+      <canvas id="chartTrend" height="90"></canvas>
     </div>
     <div class="chart-grid-2">
       <div class="card">
         <div class="card-title">This Month: Revenue vs Expenses</div>
-        <canvas id="chartRevExp" height="317" width="476" style="display: block; box-sizing: border-box; height: 317px; width: 476px;"></canvas>
+        <canvas id="chartRevExp" height="200"></canvas>
       </div>
       <div class="card">
         <div class="card-title">Revenue Mix</div>
-        <canvas id="chartRevMix" height="476" width="476" style="display: block; box-sizing: border-box; height: 476px; width: 476px;"></canvas>
+        <canvas id="chartRevMix" height="200"></canvas>
       </div>
     </div>
     <div class="chart-grid-2">
       <div class="card">
         <div class="card-title">Expense Breakdown</div>
-        <canvas id="chartExpBreakdown" height="476" width="476" style="display: block; box-sizing: border-box; height: 476px; width: 476px;"></canvas>
+        <canvas id="chartExpBreakdown" height="200"></canvas>
       </div>
       <div class="card" id="pnlGrainCard">
         <div class="card-title">🌾 Grain: Cost vs Revenue</div>
-        <canvas id="chartGrain" height="317" width="476" style="display: block; box-sizing: border-box; height: 317px; width: 476px;"></canvas>
-        <div id="pnlGrainSummary"><div style="font-size:13px;margin-top:10px;color:#6b6358;">Grain margin: <strong style="color:#2d7a4f;">$357.59</strong></div></div>
+        <canvas id="chartGrain" height="200"></canvas>
+        <div id="pnlGrainSummary"></div>
       </div>
     </div>
   </div>
