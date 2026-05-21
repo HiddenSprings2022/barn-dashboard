@@ -14,7 +14,7 @@ Content-Type: text/plain; charset=utf-8
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f3ee; color: #2d2a25; min-height: 100vh; }
 
   /* ── Save status bar ── */
-  .sync-bar { background: #3d3930; color: #f5f3ee; padding: 6px 24px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .sync-bar { background: #3d3930; color: #f5f3ee; padding: 6px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; flex-wrap: wrap; gap: 6px; }
   .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #a09888; display: inline-block; margin-right: 6px; }
   .sync-dot.green { background: #4caf50; }
   .sync-dot.yellow { background: #ff9800; animation: pulse .8s ease infinite; }
@@ -295,8 +295,8 @@ Content-Type: text/plain; charset=utf-8
     <span class="sync-dot green" id="syncDot"></span>
     <span id="syncLabel">🟢 Synced</span>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;">
-    <span id="syncTime" style="color:#6b6358;">Last sync: 10:58 PM</span>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+    <span id="syncTime" style="color:#6b6358;">Last sync: 09:40 AM</span>
     <button class="sync-btn" onclick="syncNow()">↻ Sync Now</button>
     <button class="sync-btn" onclick="openApiKeyModal()" title="Set free Gemini API key for receipt scanning">🔑 AI Key</button>
     <button class="sync-btn" onclick="exportData()">⬇ Export</button>
@@ -313,9 +313,9 @@ Content-Type: text/plain; charset=utf-8
 
 <!-- ═══ TABS ═══ -->
 <div class="tabs">
-  <div class="tab active" onclick="showTab('overview',this)">📊 Overview</div>
+  <div class="tab" onclick="showTab('overview',this)">📊 Overview</div>
   <div class="tab" onclick="showTab('clients',this)">🏠 Clients &amp; Payments</div>
-  <div class="tab" onclick="showTab('expenses',this)">💰 Expenses</div>
+  <div class="tab active" onclick="showTab('expenses',this)">💰 Expenses</div>
   <div class="tab" onclick="showTab('grain',this)">🌾 Grain</div>
   <div class="tab" onclick="showTab('pnl',this)">📈 P&amp;L</div>
   <div class="tab" onclick="showTab('invoices',this)">📋 Invoices</div>
@@ -324,14 +324,14 @@ Content-Type: text/plain; charset=utf-8
 <div class="content">
 
   <!-- OVERVIEW -->
-  <div class="section active" id="tab-overview">
+  <div class="section" id="tab-overview">
     <div id="overviewBanner"></div>
     <div class="stat-grid" id="statGrid">
     <div class="stat-card green"><div class="stat-label">Paid</div><div class="stat-value">14</div><div class="stat-sub">$9,675 received</div></div>
     <div class="stat-card"><div class="stat-label">Unpaid</div><div class="stat-value">0</div><div class="stat-sub">awaiting</div></div>
     <div class="stat-card"><div class="stat-label">Past Due</div><div class="stat-value">0</div><div class="stat-sub">&gt;5-day grace</div></div>
     <div class="stat-card"><div class="stat-label">Expected Revenue</div><div class="stat-value" style="font-size:22px;">$9,675</div><div class="stat-sub">May 2026</div></div>
-    <div class="stat-card green"><div class="stat-label">Net</div><div class="stat-value" style="font-size:22px;">+$9,409.99</div><div class="stat-sub">$265 expenses</div></div></div>
+    <div class="stat-card green"><div class="stat-label">Net</div><div class="stat-value" style="font-size:22px;">+$9,359.99</div><div class="stat-sub">$315 expenses</div></div></div>
     <div class="card">
       <div class="card-title">Payment Status — <span id="overviewMonthLabel">May 2026</span></div>
       <div id="overviewList"><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 2px;border-bottom:1px solid #f0ece6;flex-wrap:wrap;gap:8px;">
@@ -439,7 +439,7 @@ Content-Type: text/plain; charset=utf-8
           <th>Venmo</th><th>Due</th><th>Status</th><th>Actions</th>
         </tr></thead>
         <tbody id="clientBody"><tr class="">
-      <td><div style="font-weight:600;">Naomi</div><div style="margin-top:4px;font-size:11px;color:#b8b0a6;">Due 1st</div></td>
+      <td><div style="font-weight:600;">Naomi</div><div style="font-size:12px;color:#a09888;">Agrkdgsg@gmail.com</div><div style="margin-top:4px;font-size:11px;color:#b8b0a6;">Due 1st</div></td>
       <td><div class="horse-chips"><span class="hchip stall">🏠 Beau</span><span class="hchip pasture">🌿 Shadow</span><span class="hchip stall">🏠 Patty</span></div></td>
       <td>
       <div class="rate-row">
@@ -871,7 +871,7 @@ Content-Type: text/plain; charset=utf-8
   </div>
 
   <!-- EXPENSES -->
-  <div class="section" id="tab-expenses">
+  <div class="section active" id="tab-expenses">
     <div class="section-header">
       <h2>Expenses</h2>
       <button class="btn btn-primary" onclick="openAddExpense()">＋ Add Expense</button>
@@ -947,8 +947,13 @@ Content-Type: text/plain; charset=utf-8
     </div></div>
       <div id="recurringTotal" style="margin-top:10px;padding-top:10px;border-top:1px solid #f0ece6;font-size:13px;color:#6b6358;"><strong>Total recurring this month: $2730.00</strong></div>
     </div>
-    <div class="stat-grid" id="expenseSummary"><div class="stat-card"><div class="stat-label">One-Time Expenses</div><div class="stat-value" style="color:#c0392b;font-size:22px;">$265.01</div><div class="stat-sub">5 transactions</div></div><div class="stat-card"><div class="stat-label">Recurring Costs</div><div class="stat-value" style="color:#c0392b;font-size:22px;">$2730.00</div><div class="stat-sub">this month</div></div><div class="stat-card red"><div class="stat-label">Total Expenses</div><div class="stat-value" style="font-size:22px;">$2995.01</div><div class="stat-sub">May 2026</div></div><div class="stat-card"><div class="stat-label">🌾 Feed / Grain</div><div class="stat-value" style="font-size:18px;">$186.56</div></div><div class="stat-card"><div class="stat-label">📦 Other</div><div class="stat-value" style="font-size:18px;">$50.00</div></div><div class="stat-card"><div class="stat-label">🛏 Bedding</div><div class="stat-value" style="font-size:18px;">$28.45</div></div></div>
+    <div class="stat-grid" id="expenseSummary"><div class="stat-card"><div class="stat-label">One-Time Expenses</div><div class="stat-value" style="color:#c0392b;font-size:22px;">$315.01</div><div class="stat-sub">6 transactions</div></div><div class="stat-card"><div class="stat-label">Recurring Costs</div><div class="stat-value" style="color:#c0392b;font-size:22px;">$2730.00</div><div class="stat-sub">this month</div></div><div class="stat-card red"><div class="stat-label">Total Expenses</div><div class="stat-value" style="font-size:22px;">$3045.01</div><div class="stat-sub">May 2026</div></div><div class="stat-card"><div class="stat-label">📦 Other</div><div class="stat-value" style="font-size:18px;">$100.00</div></div><div class="stat-card"><div class="stat-label">🌾 Feed / Grain</div><div class="stat-value" style="font-size:18px;">$186.56</div></div><div class="stat-card"><div class="stat-label">🛏 Bedding</div><div class="stat-value" style="font-size:18px;">$28.45</div></div></div>
     <div id="expenseList"><div class="expense-item">
+    <div class="exp-icon">📦</div>
+    <div class="exp-info"><div class="exp-vendor">Kyker</div><div class="exp-meta">2026-05-21 · Other</div></div>
+    <div class="exp-amount">−$50.00</div>
+    <button class="btn btn-danger btn-sm" onclick="deleteExpense('_yf9iui0mpewtkrv')">✕</button>
+  </div><div class="expense-item">
     <div class="exp-icon">🌾</div>
     <div class="exp-info"><div class="exp-vendor">East Tennessee Feed &amp; Seed</div><div class="exp-meta">2026-05-20 · Feed / Grain · 1 tribute kalm 'n ez 
 1 Tribute Essential K</div></div>
@@ -1390,31 +1395,81 @@ Content-Type: text/plain; charset=utf-8
 
   <!-- P&L -->
   <div class="section" id="tab-pnl">
-    <div class="section-header"><h2>Profit &amp; Loss — <span id="pnlMonthLabel"></span></h2></div>
-    <div class="stat-grid" id="pnlStats"></div>
+    <div class="section-header"><h2>Profit &amp; Loss — <span id="pnlMonthLabel">May 2026</span></h2></div>
+    <div class="stat-grid" id="pnlStats">
+      <div class="stat-card green"><div class="stat-label">Board Revenue</div><div class="stat-value" style="font-size:22px;">$9,675</div><div class="stat-sub">14 clients · May 2026</div></div>
+      <div class="stat-card"><div class="stat-label">Grain Revenue</div><div class="stat-value" style="font-size:22px;">$2071</div><div class="stat-sub">Cost: $1713</div></div>
+      <div class="stat-card red"><div class="stat-label">Total Expenses</div><div class="stat-value" style="font-size:22px;">$3045</div><div class="stat-sub">Recurring: $2730</div></div>
+      <div class="stat-card green"><div class="stat-label">Net Profit</div><div class="stat-value" style="font-size:22px;">+$6988</div><div class="stat-sub">Revenue $11746 - Expenses $3045</div></div>
+      <div class="stat-card" style="grid-column:1/-1;">
+        <div class="card-title" style="margin-bottom:10px;">Client Payments — May 2026</div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Naomi</strong> <span style="color:#a09888;">Beau, Shadow, Patty</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $1,550</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>JessicaJ</strong> <span style="color:#a09888;">Prada, Flirt</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $1,200</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Marlene</strong> <span style="color:#a09888;">Gunny</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $350</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Ashley</strong> <span style="color:#a09888;">Cat</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $350</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Deb</strong> <span style="color:#a09888;">Beauty, Ellie</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $1,200</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Anne</strong> <span style="color:#a09888;">Kai</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Emily</strong> <span style="color:#a09888;">Jet</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Tanya</strong> <span style="color:#a09888;">Dream</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $350</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Laura</strong> <span style="color:#a09888;">Lai Lai</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>JessicaR</strong> <span style="color:#a09888;">Mandrid</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Erica</strong> <span style="color:#a09888;">Chichi</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $475</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Brooke</strong> <span style="color:#a09888;">Odin</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Shelby</strong> <span style="color:#a09888;">Tre</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
+      </div><div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0ece6;">
+        <span><strong>Sue</strong> <span style="color:#a09888;">Ravi</span></span>
+        <span style="font-weight:600;color:#2d7a4f;">✓ Paid · $600</span>
+      </div>
+      </div></div>
     <div class="card" style="margin-bottom:16px;">
       <div class="card-title">6-Month Revenue &amp; Expense Trend</div>
-      <canvas id="chartTrend" height="90"></canvas>
+      <canvas id="chartTrend" height="303" style="display: block; box-sizing: border-box; height: 303px; width: 1010px;" width="1010"></canvas>
     </div>
     <div class="chart-grid-2">
       <div class="card">
         <div class="card-title">This Month: Revenue vs Expenses</div>
-        <canvas id="chartRevExp" height="200"></canvas>
+        <canvas id="chartRevExp" height="317" width="476" style="display: block; box-sizing: border-box; height: 317px; width: 476px;"></canvas>
       </div>
       <div class="card">
         <div class="card-title">Revenue Mix</div>
-        <canvas id="chartRevMix" height="200"></canvas>
+        <canvas id="chartRevMix" height="476" width="476" style="display: block; box-sizing: border-box; height: 476px; width: 476px;"></canvas>
       </div>
     </div>
     <div class="chart-grid-2">
       <div class="card">
         <div class="card-title">Expense Breakdown</div>
-        <canvas id="chartExpBreakdown" height="200"></canvas>
+        <canvas id="chartExpBreakdown" height="476" width="476" style="display: block; box-sizing: border-box; height: 476px; width: 476px;"></canvas>
       </div>
       <div class="card" id="pnlGrainCard">
         <div class="card-title">🌾 Grain: Cost vs Revenue</div>
-        <canvas id="chartGrain" height="200"></canvas>
-        <div id="pnlGrainSummary"></div>
+        <canvas id="chartGrain" height="317" width="476" style="display: block; box-sizing: border-box; height: 317px; width: 476px;"></canvas>
+        <div id="pnlGrainSummary"><div style="font-size:13px;margin-top:10px;color:#6b6358;">Grain margin: <strong style="color:#2d7a4f;">$357.59</strong></div></div>
       </div>
     </div>
   </div>
@@ -3268,13 +3323,13 @@ async function pushToGithub() {
 // One-time data migration from backup
 (function() {
   try {
-    if (!localStorage.getItem('barnMigrated_v1')) {
+    if (!localStorage.getItem('barnMigrated_v2')) {
       const existing = JSON.parse(localStorage.getItem('barnDataBackup') || '{}');
       if (!existing.clients || !existing.clients.length) {
-        const backup = {"clients":[{"contact":"","dueDay":1,"horses":[{"id":"_4nq6vhvmpbet2lw","location":"stall","name":"Beau","rate":600,"stallNum":""},{"id":"_rbhxrucmpbet2lw","location":"pasture","name":"Shadow","rate":350,"stallNum":""},{"id":"_spnszptmpbet2lw","location":"stall","name":"Patty","rate":600,"stallNum":""}],"id":"_2pvrv64mpbet2lw","name":"Naomi","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_xwm1a7vmpbet2lw","location":"stall","name":"Prada","rate":600,"stallNum":""},{"id":"_fyuauf2mpbet2lw","location":"stall","name":"Flirt","rate":600,"stallNum":""}],"id":"_bu83hhhmpbet2lw","name":"JessicaJ","venmo":""},{"contact":"","dueDay":15,"horses":[{"id":"_8vuj04qmpbet2lw","location":"pasture","name":"Gunny","rate":350,"stallNum":""}],"id":"_1e5hfe0mpbet2lw","name":"Marlene","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_e1fnncgmpbet2lw","location":"pasture","name":"Cat","rate":350,"stallNum":""}],"id":"_ogbp39mmpbet2lw","name":"Ashley","venmo":""},{"contact":"","dueDay":15,"horses":[{"id":"_zgzf471mpbet2lw","location":"stall","name":"Beauty","rate":600,"stallNum":""},{"id":"_qq5og3hmpbet2lw","location":"stall","name":"Ellie","rate":600,"stallNum":""}],"id":"_2g1bgwkmpbet2lw","name":"Deb","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_hr3gfeempbet2lw","location":"stall","name":"Kai","rate":600,"stallNum":""}],"id":"_yh00rk8mpbet2lw","name":"Anne","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_1l222xfmpbet2lw","location":"stall","name":"Jet","rate":600,"stallNum":""}],"id":"_n79p5q0mpbet2lw","name":"Emily","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_fqyjfaqmpbet2lw","location":"pasture","name":"Dream","rate":350,"stallNum":""}],"id":"_119o786mpbet2lw","name":"Tanya","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_z78esrzmpbet2lw","location":"stall","name":"Lai Lai","rate":600,"stallNum":""}],"id":"_5q8lijimpbet2lw","name":"Laura","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_qe8fp4kmpbet2lw","location":"stall","name":"Mandrid","rate":600,"stallNum":""}],"id":"_a8i8cirmpbet2lw","name":"JessicaR","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_h4bvpj7mpbet2lw","location":"pasture","name":"Chichi","rate":475,"stallNum":""}],"id":"_7p9tnf8mpbet2lw","name":"Erica","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_imbyprfmpbet2lw","location":"stall","name":"Odin","rate":600,"stallNum":""}],"id":"_p1aurrjmpbet2lw","name":"Brooke","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_mg67pyrmpbet2lw","location":"stall","name":"Tre","rate":600,"stallNum":""}],"id":"_xawd8zhmpbet2lw","name":"Shelby","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_k9au6ptmpbet2lw","location":"stall","name":"Ravi","rate":600,"stallNum":""}],"id":"_yc2dub2mpbet2lw","name":"Sue","venmo":""}],"payments":{"_119o786mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_1e5hfe0mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_2g1bgwkmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_2pvrv64mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_5q8lijimpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_7p9tnf8mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_a8i8cirmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_bu83hhhmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_n79p5q0mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_ogbp39mmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_p1aurrjmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_xawd8zhmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_yc2dub2mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_yh00rk8mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"}},"expenses":[{"amount":32.49,"category":"feed","date":"2026-05-19","id":"_r7y9mq5mpd55520","notes":"","vendor":"TSC"},{"amount":50,"category":"other","date":"2026-05-19","id":"_vh9bb18mpd55vds","notes":"","vendor":"Kyker"},{"amount":28.45,"category":"bedding","date":"2026-05-19","id":"_vj7ciadmpd71wt8","notes":"5 bags","vendor":"Rural King"},{"amount":56.6,"category":"feed","date":"2026-05-20","id":"_srfbhsrmpdcq2o0","notes":"1 tribute kalm 'n ez \n1 Tribute Essential K","vendor":"East Tennessee Feed & Seed"},{"amount":97.47,"category":"feed","date":"2026-05-20","id":"_t1krmgompen3yq1","notes":"3 triple crown Senior","vendor":"TSC"}],"grainTypes":[{"chargePerLb":0,"costPerLb":0,"id":"_0fkuhp7mpbet2lw","name":"Alfalfa"},{"chargePerLb":0.58,"costPerLb":0.32,"id":"_50nnqgsmpbev5n6","name":"Alfalfa Cubes"},{"chargePerLb":0.56,"costPerLb":0.51,"id":"_r8l32nxmpbevhwu","name":"Tribute Ultra"},{"chargePerLb":0.54,"costPerLb":0.42,"id":"_ptsuldpmpbevse2","name":"Tribute CalmEZ"},{"chargePerLb":0.86,"costPerLb":0.65,"id":"_zdvl23hmpbew6vv","name":"Tribute Essential K"},{"chargePerLb":0.79,"costPerLb":0.65,"id":"_35m8hmempbewhj7","name":"Triple Crown Senior"},{"chargePerLb":0.73,"costPerLb":0.67,"id":"_7jm0xi9mpbex4t5","name":"Purina Ultium Gastric Care"},{"chargePerLb":2.28,"costPerLb":1.9,"id":"_izd13wbmpbexhp3","name":"Purina SuperSport"},{"chargePerLb":1.46,"costPerLb":1.26,"id":"_9ahqqzkmpbexu5g","name":"Purina Amplify"},{"chargePerLb":0.56,"costPerLb":0.54,"id":"_8kmou29mpbey9f8","name":"Sentinel Performance"},{"chargePerLb":0.64,"costPerLb":0.53,"id":"_mv13wznmpbeymni","name":"Beet Pulp No Molasses"}],"grainSchedule":{"_1l222xfmpbet2lw__ptsuldpmpbevse2":1,"_1l222xfmpbet2lw__zdvl23hmpbew6vv":1,"_4nq6vhvmpbet2lw__35m8hmempbewhj7":4,"_4nq6vhvmpbet2lw__50nnqgsmpbev5n6":2,"_4nq6vhvmpbet2lw__7jm0xi9mpbex4t5":0,"_4nq6vhvmpbet2lw__8kmou29mpbey9f8":0,"_4nq6vhvmpbet2lw__9ahqqzkmpbexu5g":0,"_4nq6vhvmpbet2lw__izd13wbmpbexhp3":0,"_4nq6vhvmpbet2lw__mv13wznmpbeymni":3,"_4nq6vhvmpbet2lw__r8l32nxmpbevhwu":4,"_4nq6vhvmpbet2lw__zdvl23hmpbew6vv":0,"_fqyjfaqmpbet2lw__35m8hmempbewhj7":9,"_fqyjfaqmpbet2lw__9ahqqzkmpbexu5g":1.5,"_fyuauf2mpbet2lw__35m8hmempbewhj7":4,"_fyuauf2mpbet2lw__9ahqqzkmpbexu5g":1,"_h4bvpj7mpbet2lw__ptsuldpmpbevse2":1,"_h4bvpj7mpbet2lw__zdvl23hmpbew6vv":1,"_hr3gfeempbet2lw__7jm0xi9mpbex4t5":3,"_hr3gfeempbet2lw__izd13wbmpbexhp3":0.5,"_imbyprfmpbet2lw__35m8hmempbewhj7":3,"_k9au6ptmpbet2lw__50nnqgsmpbev5n6":4,"_k9au6ptmpbet2lw__7jm0xi9mpbex4t5":3,"_k9au6ptmpbet2lw__izd13wbmpbexhp3":0.5,"_k9au6ptmpbet2lw__r8l32nxmpbevhwu":6,"_mg67pyrmpbet2lw__8kmou29mpbey9f8":7,"_qe8fp4kmpbet2lw__50nnqgsmpbev5n6":2,"_rbhxrucmpbet2lw__r8l32nxmpbevhwu":3,"_rbhxrucmpbet2lw__zdvl23hmpbew6vv":1,"_spnszptmpbet2lw__35m8hmempbewhj7":2.5,"_spnszptmpbet2lw__50nnqgsmpbev5n6":4,"_spnszptmpbet2lw__mv13wznmpbeymni":4.5,"_spnszptmpbet2lw__r8l32nxmpbevhwu":5,"_xwm1a7vmpbet2lw__ptsuldpmpbevse2":1,"_xwm1a7vmpbet2lw__zdvl23hmpbew6vv":1,"_z78esrzmpbet2lw__7jm0xi9mpbex4t5":7,"_z78esrzmpbet2lw__mv13wznmpbeymni":3,"_zgzf471mpbet2lw__0fkuhp7mpbet2lw":0,"_zgzf471mpbet2lw__35m8hmempbewhj7":0,"_zgzf471mpbet2lw__50nnqgsmpbev5n6":0,"_zgzf471mpbet2lw__7jm0xi9mpbex4t5":0,"_zgzf471mpbet2lw__8kmou29mpbey9f8":0,"_zgzf471mpbet2lw__9ahqqzkmpbexu5g":0,"_zgzf471mpbet2lw__izd13wbmpbexhp3":0,"_zgzf471mpbet2lw__mv13wznmpbeymni":0,"_zgzf471mpbet2lw__ptsuldpmpbevse2":0,"_zgzf471mpbet2lw__r8l32nxmpbevhwu":0,"_zgzf471mpbet2lw__zdvl23hmpbew6vv":1},"recurringExpenses":[{"active":true,"category":"other","dailyCost":0,"id":"_8zt5w90mpd82vuc","monthlyAmount":1400,"name":"Mike","notes":"","type":"monthly"},{"active":true,"category":"utilities","dailyCost":0,"id":"_d1kz9k3mpe6llcw","monthlyAmount":30,"name":"wifi","notes":"","type":"monthly"},{"active":true,"category":"utilities","dailyCost":0,"id":"_vp2d2kkmpe6mfla","monthlyAmount":200,"name":"electric","notes":"","type":"monthly"},{"active":true,"category":"other","dailyCost":0,"id":"_5ada9h4mpe6nz23","monthlyAmount":1100,"name":"indoor loan","notes":"","type":"monthly"}],"transitions":[{"clientName":"Deb","durationDays":1,"horseId":"_zgzf471mpbet2lw","horseName":"Beauty","id":"_3ym5itzmpena9es","label":"Owner request to drop grain in half","rampStyle":"standard","startDate":"2026-05-20","status":"completed","toFeeds":[{"grainTypeId":"_zdvl23hmpbew6vv","lbsPerDay":1,"name":"Tribute Essential K"}],"type":"immediate"}],"invoicesSent":{}};
+        const backup = {"clients":[{"contact":"","dueDay":1,"horses":[{"id":"_4nq6vhvmpbet2lw","location":"stall","name":"Beau","rate":600,"stallNum":""},{"id":"_rbhxrucmpbet2lw","location":"pasture","name":"Shadow","rate":350,"stallNum":""},{"id":"_spnszptmpbet2lw","location":"stall","name":"Patty","rate":600,"stallNum":""}],"id":"_2pvrv64mpbet2lw","name":"Naomi","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_xwm1a7vmpbet2lw","location":"stall","name":"Prada","rate":600,"stallNum":""},{"id":"_fyuauf2mpbet2lw","location":"stall","name":"Flirt","rate":600,"stallNum":""}],"id":"_bu83hhhmpbet2lw","name":"JessicaJ","venmo":""},{"contact":"","dueDay":15,"horses":[{"id":"_8vuj04qmpbet2lw","location":"pasture","name":"Gunny","rate":350,"stallNum":""}],"id":"_1e5hfe0mpbet2lw","name":"Marlene","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_e1fnncgmpbet2lw","location":"pasture","name":"Cat","rate":350,"stallNum":""}],"id":"_ogbp39mmpbet2lw","name":"Ashley","venmo":""},{"contact":"","dueDay":15,"horses":[{"id":"_zgzf471mpbet2lw","location":"stall","name":"Beauty","rate":600,"stallNum":""},{"id":"_qq5og3hmpbet2lw","location":"stall","name":"Ellie","rate":600,"stallNum":""}],"id":"_2g1bgwkmpbet2lw","name":"Deb","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_hr3gfeempbet2lw","location":"stall","name":"Kai","rate":600,"stallNum":""}],"id":"_yh00rk8mpbet2lw","name":"Anne","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_1l222xfmpbet2lw","location":"stall","name":"Jet","rate":600,"stallNum":""}],"id":"_n79p5q0mpbet2lw","name":"Emily","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_fqyjfaqmpbet2lw","location":"pasture","name":"Dream","rate":350,"stallNum":""}],"id":"_119o786mpbet2lw","name":"Tanya","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_z78esrzmpbet2lw","location":"stall","name":"Lai Lai","rate":600,"stallNum":""}],"id":"_5q8lijimpbet2lw","name":"Laura","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_qe8fp4kmpbet2lw","location":"stall","name":"Mandrid","rate":600,"stallNum":""}],"id":"_a8i8cirmpbet2lw","name":"JessicaR","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_h4bvpj7mpbet2lw","location":"pasture","name":"Chichi","rate":475,"stallNum":""}],"id":"_7p9tnf8mpbet2lw","name":"Erica","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_imbyprfmpbet2lw","location":"stall","name":"Odin","rate":600,"stallNum":""}],"id":"_p1aurrjmpbet2lw","name":"Brooke","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_mg67pyrmpbet2lw","location":"stall","name":"Tre","rate":600,"stallNum":""}],"id":"_xawd8zhmpbet2lw","name":"Shelby","venmo":""},{"contact":"","dueDay":1,"horses":[{"id":"_k9au6ptmpbet2lw","location":"stall","name":"Ravi","rate":600,"stallNum":""}],"id":"_yc2dub2mpbet2lw","name":"Sue","venmo":""}],"payments":{"_119o786mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_1e5hfe0mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_2g1bgwkmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_2pvrv64mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_5q8lijimpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_7p9tnf8mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_a8i8cirmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_bu83hhhmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_n79p5q0mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_ogbp39mmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_p1aurrjmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_xawd8zhmpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_yc2dub2mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"},"_yh00rk8mpbet2lw_2026_5":{"paid":true,"paidDate":"2026-05-18"}},"expenses":[{"amount":32.49,"category":"feed","date":"2026-05-19","id":"_r7y9mq5mpd55520","notes":"","vendor":"TSC"},{"amount":50,"category":"other","date":"2026-05-19","id":"_vh9bb18mpd55vds","notes":"","vendor":"Kyker"},{"amount":28.45,"category":"bedding","date":"2026-05-19","id":"_vj7ciadmpd71wt8","notes":"5 bags","vendor":"Rural King"},{"amount":56.6,"category":"feed","date":"2026-05-20","id":"_srfbhsrmpdcq2o0","notes":"1 tribute kalm 'n ez \n1 Tribute Essential K","vendor":"East Tennessee Feed & Seed"},{"amount":97.47,"category":"feed","date":"2026-05-20","id":"_t1krmgompen3yq1","notes":"3 triple crown Senior","vendor":"TSC"}],"grainTypes":[{"chargePerLb":0,"costPerLb":0,"id":"_0fkuhp7mpbet2lw","name":"Alfalfa"},{"chargePerLb":0.58,"costPerLb":0.32,"id":"_50nnqgsmpbev5n6","name":"Alfalfa Cubes"},{"chargePerLb":0.56,"costPerLb":0.51,"id":"_r8l32nxmpbevhwu","name":"Tribute Ultra"},{"chargePerLb":0.54,"costPerLb":0.42,"id":"_ptsuldpmpbevse2","name":"Tribute CalmEZ"},{"chargePerLb":0.86,"costPerLb":0.65,"id":"_zdvl23hmpbew6vv","name":"Tribute Essential K"},{"chargePerLb":0.79,"costPerLb":0.65,"id":"_35m8hmempbewhj7","name":"Triple Crown Senior"},{"chargePerLb":0.73,"costPerLb":0.67,"id":"_7jm0xi9mpbex4t5","name":"Purina Ultium Gastric Care"},{"chargePerLb":2.28,"costPerLb":1.9,"id":"_izd13wbmpbexhp3","name":"Purina SuperSport"},{"chargePerLb":1.46,"costPerLb":1.26,"id":"_9ahqqzkmpbexu5g","name":"Purina Amplify"},{"chargePerLb":0.56,"costPerLb":0.54,"id":"_8kmou29mpbey9f8","name":"Sentinel Performance"},{"chargePerLb":0.64,"costPerLb":0.53,"id":"_mv13wznmpbeymni","name":"Beet Pulp No Molasses"}],"grainSchedule":{"_1l222xfmpbet2lw__ptsuldpmpbevse2":1,"_1l222xfmpbet2lw__zdvl23hmpbew6vv":1,"_4nq6vhvmpbet2lw__35m8hmempbewhj7":4,"_4nq6vhvmpbet2lw__50nnqgsmpbev5n6":2,"_4nq6vhvmpbet2lw__7jm0xi9mpbex4t5":0,"_4nq6vhvmpbet2lw__8kmou29mpbey9f8":0,"_4nq6vhvmpbet2lw__9ahqqzkmpbexu5g":0,"_4nq6vhvmpbet2lw__izd13wbmpbexhp3":0,"_4nq6vhvmpbet2lw__mv13wznmpbeymni":3,"_4nq6vhvmpbet2lw__r8l32nxmpbevhwu":4,"_4nq6vhvmpbet2lw__zdvl23hmpbew6vv":0,"_fqyjfaqmpbet2lw__35m8hmempbewhj7":9,"_fqyjfaqmpbet2lw__9ahqqzkmpbexu5g":1.5,"_fyuauf2mpbet2lw__35m8hmempbewhj7":4,"_fyuauf2mpbet2lw__9ahqqzkmpbexu5g":1,"_h4bvpj7mpbet2lw__ptsuldpmpbevse2":1,"_h4bvpj7mpbet2lw__zdvl23hmpbew6vv":1,"_hr3gfeempbet2lw__7jm0xi9mpbex4t5":3,"_hr3gfeempbet2lw__izd13wbmpbexhp3":0.5,"_imbyprfmpbet2lw__35m8hmempbewhj7":3,"_k9au6ptmpbet2lw__50nnqgsmpbev5n6":4,"_k9au6ptmpbet2lw__7jm0xi9mpbex4t5":3,"_k9au6ptmpbet2lw__izd13wbmpbexhp3":0.5,"_k9au6ptmpbet2lw__r8l32nxmpbevhwu":6,"_mg67pyrmpbet2lw__8kmou29mpbey9f8":7,"_qe8fp4kmpbet2lw__50nnqgsmpbev5n6":2,"_rbhxrucmpbet2lw__r8l32nxmpbevhwu":3,"_rbhxrucmpbet2lw__zdvl23hmpbew6vv":1,"_spnszptmpbet2lw__35m8hmempbewhj7":2.5,"_spnszptmpbet2lw__50nnqgsmpbev5n6":4,"_spnszptmpbet2lw__mv13wznmpbeymni":4.5,"_spnszptmpbet2lw__r8l32nxmpbevhwu":5,"_xwm1a7vmpbet2lw__ptsuldpmpbevse2":1,"_xwm1a7vmpbet2lw__zdvl23hmpbew6vv":1,"_z78esrzmpbet2lw__7jm0xi9mpbex4t5":7,"_z78esrzmpbet2lw__mv13wznmpbeymni":3,"_zgzf471mpbet2lw__0fkuhp7mpbet2lw":0,"_zgzf471mpbet2lw__35m8hmempbewhj7":0,"_zgzf471mpbet2lw__50nnqgsmpbev5n6":0,"_zgzf471mpbet2lw__7jm0xi9mpbex4t5":0,"_zgzf471mpbet2lw__8kmou29mpbey9f8":0,"_zgzf471mpbet2lw__9ahqqzkmpbexu5g":0,"_zgzf471mpbet2lw__izd13wbmpbexhp3":0,"_zgzf471mpbet2lw__mv13wznmpbeymni":0,"_zgzf471mpbet2lw__ptsuldpmpbevse2":0,"_zgzf471mpbet2lw__r8l32nxmpbevhwu":0,"_zgzf471mpbet2lw__zdvl23hmpbew6vv":1},"recurringExpenses":[{"active":true,"category":"other","dailyCost":0,"id":"_8zt5w90mpd82vuc","monthlyAmount":1400,"name":"Mike","notes":"","type":"monthly"},{"active":true,"category":"utilities","dailyCost":0,"id":"_d1kz9k3mpe6llcw","monthlyAmount":30,"name":"wifi","notes":"","type":"monthly"},{"active":true,"category":"utilities","dailyCost":0,"id":"_vp2d2kkmpe6mfla","monthlyAmount":200,"name":"electric","notes":"","type":"monthly"},{"active":true,"category":"other","dailyCost":0,"id":"_5ada9h4mpe6nz23","monthlyAmount":1100,"name":"indoor loan","notes":"","type":"monthly"}],"transitions":[{"clientName":"Deb","durationDays":1,"horseId":"_zgzf471mpbet2lw","horseName":"Beauty","id":"_3ym5itzmpena9es","label":"Owner request to drop grain in half","rampStyle":"standard","startDate":"2026-05-20","status":"completed","toFeeds":[{"grainTypeId":"_zdvl23hmpbew6vv","lbsPerDay":1,"name":"Tribute Essential K"}],"type":"immediate"}]};
         localStorage.setItem('barnDataBackup', JSON.stringify(backup));
       }
-      localStorage.setItem('barnMigrated_v1', '1');
+      localStorage.setItem('barnMigrated_v2', '1');
       // GitHub repo default (no token stored in file — enter via the GitHub button)
       if (!localStorage.getItem('barnGithubRepo'))
         localStorage.setItem('barnGithubRepo', 'HiddenSprings2022/barn-dashboard');
